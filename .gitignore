@@ -12,6 +12,7 @@ log/*
 /*_hosts
 
 !.gitkeep
+!*.example
 
 /.vscode/*
 /tags

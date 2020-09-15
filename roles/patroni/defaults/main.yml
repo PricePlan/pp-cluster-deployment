@@ -1,0 +1,4 @@
+# defaults file for patroni
+---
+patroni_config_dir: /etc/patroni
+patroni_pve: '{{ pves_home }}/patroni'

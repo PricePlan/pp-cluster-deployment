@@ -1,0 +1,3 @@
+haproxy_chroot_dir: /var/lib/haproxy
+haproxy_timeout_check: 10
+haproxy_frontend_pg_port: 7432

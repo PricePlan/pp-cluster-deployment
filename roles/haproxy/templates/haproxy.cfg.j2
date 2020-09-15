@@ -1,0 +1,102 @@
+#---------------------------------------------------------------------
+# See the full configuration options online.
+#
+#   https://www.haproxy.org/download/1.8/doc/configuration.txt
+#
+#---------------------------------------------------------------------
+
+#---------------------------------------------------------------------
+# Global settings
+#---------------------------------------------------------------------
+global
+  log         /dev/log local0 info
+  chroot      {{ haproxy_chroot_dir }}
+  pidfile     /var/run/haproxy.pid
+  maxconn     400
+  user        haproxy
+  group       haproxy
+  daemon
+
+  # turn on stats unix socket
+  stats socket /var/lib/haproxy/stats
+
+  # utilize system-wide crypto-policies
+  ssl-default-bind-ciphers PROFILE=SYSTEM
+  ssl-default-server-ciphers PROFILE=SYSTEM
+
+#---------------------------------------------------------------------
+# common defaults that all the 'listen' and 'backend' sections will
+# use if not designated in their block
+#---------------------------------------------------------------------
+defaults
+  mode                    tcp
+  log                     global
+  # option                  httplog
+  option                  dontlognull
+  # option http-server-close
+  # option forwardfor       except 127.0.0.0/8
+  option                  redispatch
+  retries                 3
+  timeout http-request    10s
+  timeout queue           1m
+  timeout connect         10s
+  timeout client          1m
+  timeout server          1m
+  timeout http-keep-alive 10s
+  timeout check           {{ haproxy_timeout_check }}s
+  maxconn                 500
+
+#---------------------------------------------------------------------
+# frontend for PostgreSQL (via PgBouncer)
+#---------------------------------------------------------------------
+frontend pg
+  mode tcp
+  bind *:{{ haproxy_frontend_pg_port }}
+  use_backend postgres
+
+#---------------------------------------------------------------------
+# main frontend which proxys to the backends
+#---------------------------------------------------------------------
+# frontend main
+#    bind *:5000
+#    acl url_static       path_beg       -i /static /images /javascript /stylesheets
+#    acl url_static       path_end       -i .jpg .gif .png .css .js
+#
+#    use_backend static          if url_static
+#    default_backend             app
+
+
+#---------------------------------------------------------------------
+# backend for PgBouncer with check Patroni status
+#---------------------------------------------------------------------
+backend postgres
+  timeout connect 4s
+  timeout check 5s
+
+  option httpchk
+  http-check expect status 200
+
+  default-server inter 3s fall 3 rise 2
+
+{% for host in cluster %}
+  server {{ host.name }} {{ host.ip }}:{{ pgbouncer_listen_port }} maxconn 500 check port 8008
+{% endfor %}
+
+
+#---------------------------------------------------------------------
+# static backend for serving up images, stylesheets and such
+#---------------------------------------------------------------------
+# backend static
+#    balance     roundrobin
+#    server      static 127.0.0.1:4331 check
+
+
+#---------------------------------------------------------------------
+# round robin balancing between the various backends
+#---------------------------------------------------------------------
+# backend app
+#    balance     roundrobin
+#    server  app1 127.0.0.1:5001 check
+#    server  app2 127.0.0.1:5002 check
+#    server  app3 127.0.0.1:5003 check
+#    server  app4 127.0.0.1:5004 check

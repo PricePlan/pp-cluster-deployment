@@ -1,0 +1,47 @@
+- name: run Patroni service on {{ target_group }}
+  become: yes
+  systemd:
+    name: patroni
+    state: started
+    enabled: yes
+  when: 'target_group in group_names'
+  tags:
+    - patroni_master
+    - patroni_replica
+
+- block:
+  - name: check PostgreSQL is accepting connections on {{ target_group }}
+    command: '{{ postgres_bin_dir }}/pg_isready -p {{ postgres_port }}'
+    register: pg_isready_result
+    until: pg_isready_result.rc == 0
+    retries: 30
+    delay: 10
+    changed_when: false
+
+  - name: generate pg_hba.conf on {{ target_group }}
+    template:
+      src: pg_hba.conf.j2
+      dest: '{{ postgres_conf_dir }}/pg_hba.conf'
+      owner: postgres
+      group: postgres
+      mode: 0640
+    register: pg_hba_generation
+    tags:
+       - pg_hba
+
+  # - name: generation result
+  #   debug:
+  #     var: pg_hba_generation
+
+  - name: reload {{ target_group }} for apply the pg_hba.conf
+    command: "{{ postgres_bin_dir }}/psql -p {{ postgres_port }} -c 'SELECT pg_reload_conf()'"
+    register: psql_reload_result
+    failed_when: psql_reload_result.rc != 0
+    when: pg_hba_generation.changed
+
+  when: 'target_group in group_names'
+  become: yes
+  become_user: postgres
+  tags:
+    - patroni_master
+    - patroni_replica

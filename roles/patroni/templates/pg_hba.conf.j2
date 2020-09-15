@@ -1,0 +1,14 @@
+# PostgreSQL Client Authentication Configuration File
+# ===================================================
+
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+{% for client in postgres_pg_hba %}
+{{ client.type.ljust(8) | default('host') }}{{ client.database.ljust(16) | default('all') }}{{ client.user.ljust(16) | default('all') }}{{ client.address.ljust(24) | default('') }}{{ client.method | default('md5') }} {{ client.options | default(None) }}
+{% endfor %}
+
+# Allow replication connections from localhost, by a user with the
+# replication privilege.
+host    replication     {{ patroni_replication_username }}      127.0.0.1/32            md5
+{% for host in cluster %}
+host    replication     {{ patroni_replication_username }}      {{ host.ip }}/32           md5
+{% endfor %}

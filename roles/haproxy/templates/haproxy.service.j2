@@ -1,0 +1,18 @@
+[Unit]
+Description=HAProxy Load Balancer
+After=network.target
+
+[Service]
+Environment="CONFIG=/etc/haproxy/haproxy.cfg" "PIDFILE=/run/haproxy.pid"
+ExecStartPre=/usr/bin/mount --bind /dev/log {{ haproxy_chroot_dir }}/dev/log
+ExecStartPre=/usr/sbin/haproxy -f $CONFIG -c -q
+ExecStart=/usr/sbin/haproxy -Ws -f $CONFIG -p $PIDFILE
+ExecReload=/usr/sbin/haproxy -f $CONFIG -c -q
+ExecReload=/bin/kill -USR2 $MAINPID
+ExecStopPost=/usr/bin/umount {{ haproxy_chroot_dir }}/dev/log
+SuccessExitStatus=143
+KillMode=mixed
+Type=notify
+
+[Install]
+WantedBy=multi-user.target

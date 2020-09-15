@@ -1,0 +1,62 @@
+# Deploy whole stack of PricePlan
+---
+- name: Deploy PricePlan on cluster
+  hosts:
+    - pp_cluster
+  # strategy: debug
+  gather_facts: yes
+
+  roles:
+    # - role: timezone
+
+    - role: ntp
+      tags:
+      - ntp
+
+    - role: docker
+      when: '"pp_cluster" in group_names'
+      tags:
+      - docker
+
+    - role: 'dockers/etcd'
+      when: '"etcd_cluster" in group_names'
+      tags:
+      - etcd
+      - etcd_conf
+
+    - role: postgres
+      when: '"postgres_cluster" in group_names'
+      tags:
+      - postgres
+
+    - role: patroni
+      when: '"postgres_cluster" in group_names'
+      tags:
+      - patroni
+
+    # - role: postgres_users
+
+    # - role: postgres_databases
+
+    - role: pgbouncer
+      when: '"postgres_cluster" in group_names'
+      tags:
+      - pgbouncer
+
+    - role: haproxy
+      when: '"postgres_cluster" in group_names'
+      tags:
+      - haproxy
+
+
+    # - role: postgresql-users
+    #   when: is_master == "true" and postgresql_users | length > 0
+
+    # - role: postgresql-databases
+    #   when: is_master == "true" and postgresql_databases | length > 0
+
+    # - role: postgresql-extensions
+    #   when: is_master == "true" and postgresql_extensions | length > 0
+
+    # - role: pgbouncer/userlist
+    #   when: pgbouncer_install|bool and pgbouncer_generate_userlist|boo

@@ -1,0 +1,79 @@
+scope: {{ postgres_cluster_name }}
+namespace: /service/
+name: {{ ansible_hostname }}
+
+restapi:
+  listen: 0.0.0.0:8008
+  connect_address: {{ inventory_hostname }}:8008
+
+etcd:
+  hosts: {{ etcd_hosts_ports | to_yaml }}
+
+bootstrap:
+  # this section will be written into Etcd:/<namespace>/<scope>/config after initializing new cluster
+  # and all other cluster members will use it as a `global configuration`
+  dcs:
+    ttl: {{ patroni_ttl }}
+    loop_wait: {{ patroni_loop_wait }}
+    retry_timeout: {{ patroni_retry_timeout }}
+    maximum_lag_on_failover: {{ patroni_maximum_lag_on_failover }}
+    postgresql:
+      use_pg_rewind: {{ patroni_postgres_use_pg_rewind }}
+      use_slots: true
+      parameters: {}
+
+  # some desired options for 'initdb'
+  # Note: It needs to be a list (some options need values, others are switches)
+  initdb:
+    - encoding: {{ postgres_encoding }}
+    - locale: {{ postgres_locale }}
+    {% if postgres_data_checksums | bool %}- data-checksums{% endif %}
+
+  # Add following lines to pg_hba.conf after running 'initdb'
+  pg_hba:
+    - host replication {{ patroni_replication_username }} 127.0.0.1/32 md5
+    - host all all 0.0.0.0/0 md5
+
+  # Additional script to be launched after initial cluster creation (will
+  # be passed the connection URL as parameter)
+  # post_init: /usr/local/bin/setup_cluster.sh
+
+  # Some additional users users which needs to be created after initializing
+  # new cluster
+  # users:
+  #   priceplan:
+  #     password: secret
+  #     options:
+  #       - createrole
+  #       - createdb
+
+postgresql:
+  listen: 0.0.0.0:5432
+  connect_address: {{ ansible_default_ipv4.address }}:5432
+  data_dir: {{ postgres_data_dir }}
+  bin_dir: {{ postgres_bin_dir }}
+  config_dir: {{ postgres_data_dir }}
+  pgpass: {{ patroni_pgpass }}
+  authentication:
+    replication:
+      username: {{ patroni_replication_username }}
+      password: '{{ patroni_replication_password }}'
+    superuser:
+      username: {{ patroni_superuser_username }}
+      password: '{{ patroni_superuser_password }}'
+    rewind:  # Has no effect on postgres 10 and lower
+      username: {{ patroni_rewind_user }}
+      password: '{{ patroni_rewind_password }}'
+
+  parameters:
+    unix_socket_directories: '{{ postgres_unix_socket_dir }}'
+
+  basebackup:
+    - verbose
+    - max-rate: 100M
+
+tags:
+  nofailover: false
+  noloadbalance: false
+  clonefrom: false
+  nosync: false

@@ -1,0 +1,11 @@
+- name: start to ensure docker-ce installed
+  include_tasks: centos-8.yaml
+  when:
+    - ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
+  tags:
+    - docker
+
+
+# - name: reset ssh connection to allow user changes to affect 'current login user'
+#   meta: reset_connection
+#   when: group_add_to_docker.changed

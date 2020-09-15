@@ -1,0 +1,43 @@
+- block:
+  - name: ensure EPEL repo installed
+    dnf:
+      name: epel-release
+      state: present
+    tags:
+      - epel_install
+
+  - name: ensure PgBouncer package installed
+    dnf:
+      name: pgbouncer
+      state: present
+    tags:
+      - pgbouncer_install
+
+  - name: ensure PgBouncer config is up to date
+    template:
+      src: pgbouncer.ini.j2
+      dest: /etc/pgbouncer/pgbouncer.ini
+      owner: pgbouncer
+      group: pgbouncer
+      mode: 0600
+    tags:
+      - pgbouncer_config
+
+  - name: generate auth file
+    template:
+      src: userlist.txt.j2
+      dest: /etc/pgbouncer/userlist.txt
+      owner: pgbouncer
+      group: pgbouncer
+      mode: 0600
+    tags:
+      - pgbouncer_userlist
+
+  - name: ensure PgBouncer service is running
+    systemd:
+      name: pgbouncer
+      state: started
+      enabled: true
+
+  become: yes
+

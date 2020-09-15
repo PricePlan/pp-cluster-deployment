@@ -1,0 +1,55 @@
+# Task or role `docker` for Centos 8
+---
+- block:
+  - name: ensure repository for docker-ce presents
+    yum_repository:
+      name: docker-ce-stable
+      description: Docker CE Stable - $basearch
+      baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+      enabled: true
+      gpgcheck: true
+      gpgkey: https://download.docker.com/linux/centos/gpg
+    tags:
+      - docker_ce_repo
+
+  - name: import GPG key "Docker Release (CE rpm) <docker@docker.com>"
+    rpm_key:
+      key: https://download.docker.com/linux/centos/gpg
+      fingerprint: 060A 61C5 1B55 8A7F 742B 77AA C52F EB6B 621E 9F35
+      state: present
+
+  # - name: check Docker CE repository presents
+  - name: enable container-tools module
+    command:
+      cmd: dnf module enable container-tools -y
+      warn: false
+
+  - name: ensure container-selinux installed
+    dnf:
+      name: container-selinux
+      state: present
+
+  - name: disable container-tools module
+    command:
+      cmd: dnf module disable container-tools -y
+      warn: false
+
+  - name: ensure docker-ce installed
+    dnf:
+      name: docker-ce
+      state: present
+
+  - name: ensure service docker running
+    systemd:
+      name: docker
+      state: started
+      enabled: yes
+
+  - name: ensure python docker package presents
+    pip:
+      name: docker
+      # executable: pip3
+
+  become: yes
+  tags:
+    - docker_install

@@ -1,0 +1,9 @@
+site_name: PricePlan
+nav:
+  - notes.md
+  - 'Установка сервисов':
+    - services/elastic.md
+    - services/postgres.md
+    - services/rabbitmq.md
+    - services/redis.md
+  - pp.md

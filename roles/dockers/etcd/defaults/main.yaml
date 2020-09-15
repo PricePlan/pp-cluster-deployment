@@ -1,0 +1,58 @@
+# Default values of 'dockers/etcd' role
+---
+etcd_version: 3
+etcd_image_name:
+  'bitnami/etcd{% if etcd_version %}:{{ etcd_version }}{% endif %}'
+
+etcd_ip: 0.0.0.0
+etcd_ports:
+  - '2379'
+  - '2380'
+
+etcd_container_name: etcd
+
+etcd_network_mode: host
+etcd_log_driver: json-file
+etcd_log_options:
+  mode: non-blocking
+  max-buffer-size: 4m
+
+nonhost_etcd_published_ports:
+ - '{{ etcd_ip }}:{{ etcd_ports[0] }}:{{ etcd_ports[0] }}'
+ - '{{ etcd_ip }}:{{ etcd_ports[1] }}:{{ etcd_ports[1] }}'
+
+etcd_published_ports: '{% if etcd_network_mode == "host" %}[]
+  {% else %}{{ nonhost_etcd_published_ports | to_yaml }}{% endif %}'
+
+etcd_conf_dir: /etc/etcd
+etcd_home: /opt/etcd
+etcd_data_dir: '{{ etcd_home }}/data'
+etcd_wal_dir: '{{ etcd_home }}/wal'
+
+etcd_environment:
+  ALLOW_NONE_AUTHENTICATION: 'yes'
+  ETCD_CONFIG_FILE: '/opt/bitnami/etcd/conf/etcd.conf.yml'
+
+  # ETCD_NAME: '{{ ansible_hostname }}'
+  # ETCD_INITIAL_CLUSTER_TOKEN: '{{ etcd_cluster_name }}'
+  # ETCD_ADVERTISE_CLIENT_URLS: 'http://{{ ansible_default_ipv4.address }}:2379'
+  # ETCD_INITIAL_CLUSTER: "{% for host in groups['etcd_cluster'] %}{{ hostvars[host]['ansible_hostname'] }}=http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2380{% if not loop.last %},{% endif %}{% endfor %}"
+  # ETCD_LISTEN_PEER_URLS: 'http://{{ ansible_default_ipv4.address }}:2380'
+  # ETCD_INITIAL_ADVERTISE_PEER_URLS: 'http://{{ ansible_default_ipv4.address }}:2380'
+  # ETCDCTL_API: '2'
+
+  # ETCD_CONFIG_FILE: '{{ etcd_conf_dir }}/etcd.conf'
+  # ETCD_DATA_DIR: '{{ etcd_data_dir }}'
+
+  # ETCD_CONFIG_FILE: '{{ etcd_conf_dir }}/etcd.conf'
+
+  # ETCD_INITIAL_CLUSTER="{% for host in groups['etcd_cluster'] %}{{ hostvars[host]['ansible_hostname'] }}=http://{{ hostvars[host]['inventory_hostname'] }}:2380{% if not loop.last %},{% endif %}{% endfor %}"
+  # ETCD_CONFIG_FILE="{{ etcd_conf_dir }}/etcd.conf"
+  # ETCD_DATA_DIR="{{ etcd_data_dir }}"
+
+etcd_volumes:
+  - '{{ etcd_home }}:/bitnami/etcd/:rw'
+  - '{{ etcd_conf_dir }}/etcd.conf.yaml:/opt/bitnami/etcd/conf/etcd.conf.yml:ro'
+
+etcd_uid: '1001'
+etcd_gid: '0'

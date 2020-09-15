@@ -1,0 +1,68 @@
+- name: check doker-ce installed
+  command: /usr/bin/apt list --installed
+  register: check_docker_ce
+
+- block:
+  - name: add Docker’s official GPG key
+    apt_key:
+      id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+      url: 'https://download.docker.com/linux/ubuntu/gpg'
+      state: present
+    register: docker_key_added
+
+#  - name: get Ubuntu release name
+#    command: /usr/bin/lsb_release -cs
+#    register: the_ubuntu_release_name
+#    when: not ubuntu_release_name
+  - name: define ubuntu release name
+    set_fact:
+      ubuntu_release_name: '{{ ansible_distribution_release | default("bionic") }}'
+
+  - name: add Docker stable repository
+    apt_repository:
+      repo: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu
+        {{ ubuntu_release_name }} stable'
+      state: present
+    register: docker_repo_added
+    when: ubuntu_release_name != 'bionic'
+
+  - name: ensure PRE packages installed
+    apt: name='{{ docker_pre_packages }}' update_cache=yes state=present
+    register: docker_pre_packages_installed
+
+  - name: add Docker edge repository
+    apt_repository:
+      repo: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu
+        {{ ubuntu_release_name }} edge'
+      state: present
+    register: docker_repo_added
+    when: ubuntu_release_name == 'bionic'
+
+  - name: ensure docker-ce package installed
+    apt: name='{{ docker_packages }}' update_cache=yes state=present
+    register: docker_installed
+
+  become: yes
+  when: '"docker-ce" not in check_docker_ce.stdout'
+
+- block:
+  - name: add users to docker group if need
+    user:
+      name: '{{ item }}'
+      groups: docker
+      append: yes
+    with_items:
+      - '{{ deploy_user }}'
+    register: group_add_to_docker
+    # vars:
+    #   ansible_ssh_pipelining: no
+
+  - name: ensure necessary OS package installed
+    apt: name='{{ docker_necessary_os_packages }}' update_cache=yes
+      state=present
+    register: pip3_installed
+
+  - name: ensure necessary python packages
+    pip: name='{{ docker_necessary_python_packages }}' executable=/usr/bin/pip3
+
+  become: yes

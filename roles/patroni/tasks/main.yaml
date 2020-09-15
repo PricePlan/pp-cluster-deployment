@@ -1,0 +1,87 @@
+# tasks file for patroni
+---
+- block:
+    - name: ensure {{ patroni_config_dir }} exists
+      file:
+        path: '{{ patroni_config_dir }}'
+        state: directory
+        owner: postgres
+        group: postgres
+        mode: '0740'
+
+    - name: ensure {{ pves_home }} exists
+      file:
+        path: '{{ pves_home }}'
+        state: directory
+        owner: '{{ deploy_user }}'
+        group: '{{ deploy_group }}'
+
+    - name: ensure patroni OS dependencies installed
+      dnf:
+        name: '{{ patroni_os_packages }}'
+        state: present
+
+  become: yes
+  tags:
+    - patroni_pre_install
+
+- name: ensure PVE for patroni created
+  pip:
+    name: '{{ patroni_python_packages }}'
+    virtualenv: '{{ patroni_pve }}'
+    virtualenv_python: python3
+    virtualenv_site_packages: yes
+  # register: partroni_pve_created
+  tags:
+    - patroni_pve
+
+- block:
+  - name: ensure patroni.yaml is up to date
+    template:
+      src: patroni.yaml.j2
+      dest: '{{ patroni_config_dir }}/patroni.yaml'
+      owner: postgres
+      group: postgres
+      mode: '0400'
+    tags:
+      - patroni_conf
+
+  - name: ensure PG data directory exist and has proper owner
+    file:
+      path: '{{ postgres_data_dir }}'
+      state: directory
+      owner: postgres
+      group: postgres
+      mode: '0700'
+    tags:
+      - pg_data
+      - patroni_init_master
+
+  - name: place Patroni systemd units
+    template:
+      src: patroni.service.j2
+      dest: /etc/systemd/system/patroni.service
+      owner: root
+      group: root
+      mode: 0644
+    tags:
+      - patroni_conf
+      - patroni_service
+
+  become: yes
+
+- name: start Master
+  vars:
+    target_group: master
+  include_tasks: start_group.yaml
+  when: 'target_group in group_names'
+  tags:
+    - patroni_master
+
+- name: start Replica
+  vars:
+    target_group: replica
+  include_tasks: start_group.yaml
+  when: 'target_group in group_names'
+  tags:
+    - patroni_replica

@@ -1,0 +1,32 @@
+# vars file for patroni
+---
+patroni_os_packages:
+  - virtualenv
+  - python3-psutil
+
+patroni_python_packages:
+  - psycopg2-binary
+  - python-etcd
+  - patroni
+
+postgres_pg_hba:
+  - type: local
+    database: all
+    user: postgres
+    address: ''
+    method: trust
+  - type: local
+    database: all
+    user: all
+    address: ''
+    method: peer
+  - type: host
+    database: all
+    user: all
+    address: 127.0.0.1/32
+    method: md5
+  - type: host
+    database: all
+    user: all
+    address: '::1/128'
+    method: md5

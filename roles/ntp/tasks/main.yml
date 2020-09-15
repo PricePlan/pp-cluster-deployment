@@ -1,0 +1,23 @@
+# tasks file for ntp
+---
+- block:
+  - name: install chrony package
+    package:
+      name: chrony
+      state: present
+    tags:
+      - ntp_install
+    when: ansible_os_family == 'RedHat' and
+          ansible_distribution_major_version >= '8'
+
+  - name: ensure chronyd service is active
+    systemd:
+      name: chronyd
+      state: started
+      enabled: yes
+    tags:
+      - ntp_start
+
+  become: yes
+  tags:
+    - ntp

@@ -1,0 +1,1 @@
+"{{ pp_postgres_user }}" "md5{{[pp_postgres_password, pp_postgres_user] | join('') | hash('md5')}}"

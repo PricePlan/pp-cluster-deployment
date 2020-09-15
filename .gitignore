@@ -1,0 +1,17 @@
+
+*.retry
+
+/pve
+
+keys/*
+group_vars/*
+host_vars/*
+log/*
+
+/hosts
+/*_hosts
+
+!.gitkeep
+
+/.vscode/*
+/tags

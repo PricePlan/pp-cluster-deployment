@@ -1,0 +1,86 @@
+- block:
+  - name: ensure HAProxy package installed
+    dnf:
+      name: haproxy
+      state: present
+    tags:
+      - haproxy_install
+
+  - name: ensure "net.ipv4.ip_nonlocal_bind" is set
+    sysctl:
+      name: net.ipv4.ip_nonlocal_bind
+      value: '1'
+      sysctl_set: yes
+      state: present
+      reload: yes
+    tags:
+      - haproxy_sysctl
+
+  - name: ensure "haproxy_connect_any" SELinux flag on
+    seboolean:
+      name: haproxy_connect_any
+      state: yes
+      persistent: yes
+    tags:
+      - haproxy_sebool
+
+  - name: ensure {{ haproxy_chroot_dir }}/dev directory exists
+    file:
+      path: '{{ haproxy_chroot_dir }}/dev'
+      state: directory
+      owner: haproxy
+      group: haproxy
+      mode: '0750'
+    tags:
+      - haproxy_devlog
+
+  - name: ensure {{ haproxy_chroot_dir }}/dev/log file exists
+    file:
+      path: '{{ haproxy_chroot_dir }}/dev/log'
+      state: touch
+      owner: haproxy
+      group: haproxy
+      mode: '0644'
+    tags:
+      - haproxy_devlog
+
+  - name: ensure systemd HAProxy unit is up to date
+    template:
+      src: haproxy.service.j2
+      dest: /etc/systemd/system/haproxy.service
+      owner: root
+      group: root
+      mode: 0644
+    register: haproxy_unit
+    notify: 'restart haproxy'
+    tags:
+      - haproxy_service
+
+  - name: ensure systemd HAProxy unit enabled
+    systemd:
+      name: haproxy
+      enabled: yes
+    when: haproxy_unit.changed
+    tags:
+      - haproxy_service
+
+  - name: ensure HAProxy config is up to date
+    template:
+      src: haproxy.cfg.j2
+      dest: /etc/haproxy/haproxy.cfg
+      owner: haproxy
+      group: haproxy
+      mode: 0640
+    notify: 'restart haproxy'
+    tags:
+      - haproxy_config
+
+  - name: ensure HAProxy service is running
+    systemd:
+      name: haproxy
+      state: started
+      enabled: true
+    tags:
+      - haproxy_started
+
+  become: yes

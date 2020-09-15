@@ -1,0 +1,50 @@
+# Task or role `docker` for Centos 8
+---
+- block:
+  - name: ensure PG home directory exist and has proper owner
+    file:
+      path: '{{ postgres_home }}'
+      state: directory
+      owner: postgres
+      group: postgres
+      mode: '0700'
+    tags:
+      - postgres_install
+
+  # - name: enable postgresql module
+  #   command:
+  #     cmd: dnf module enable postgresql:{{ postgres_version }} -y
+  #     warn: false
+  #   tags:
+  #     - postgres_install
+  #   register: switch_module_postgres
+  #   failed_when: "switch_module_postgres.rc != 0"
+
+  - name: ensure PostgreSQL packages installed
+    dnf:
+      name: '{{ postgres_package_profiles }}'
+      # '@postgresql:{{ postgres_version }}/{{ item }}'
+      state: present
+    #loop:
+    #  - server
+    #  - client
+    tags:
+      - postgres_install
+
+  # - name: ensure PostgreSQL packages installed
+  #   dnf:
+  #     name: '{{ item }}'
+  #     state: present
+  #   loop: '{{ postgres_packages }}'
+  #   tags:
+  #     - postgres_install
+
+  - name: ensure service postgresql disabled
+    systemd:
+      name: postgresql
+      state: stopped
+      enabled: no
+
+  become: yes
+  tags:
+    - postgres_install

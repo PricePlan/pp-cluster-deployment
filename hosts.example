@@ -1,10 +1,10 @@
 # Inventory example
 [master]
-host1.tl.dr
+pp1 ansible_host=100.200.50.1
 
 [replica]
-host2.tl.dr
-host3.tl.dr
+pp2 ansible_host=100.200.50.2
+pp3 ansible_host=100.200.50.3
 
 [pp_cluster:children]
 master

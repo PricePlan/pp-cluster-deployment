@@ -23,7 +23,7 @@ election-timeout: 1000
 quota-backend-bytes: 0
 
 # List of comma separated URLs to listen on for peer traffic.
-listen-peer-urls: http://{{ ansible_default_ipv4.address }}:2380
+listen-peer-urls: http://{{ cluster[ansible_hostname] }}:2380
 
 # List of comma separated URLs to listen on for client traffic.
 listen-client-urls: http://0.0.0.0:2379
@@ -39,11 +39,11 @@ max-wals: 5
 
 # List of this member's peer URLs to advertise to the rest of the cluster.
 # The URLs needed to be a comma-separated list.
-initial-advertise-peer-urls: http://{{ ansible_default_ipv4.address }}:2380
+initial-advertise-peer-urls: http://{{ cluster[ansible_hostname] }}:2380
 
 # List of this member's client URLs to advertise to the public.
 # The URLs needed to be a comma-separated list.
-advertise-client-urls: http://{{ ansible_default_ipv4.address }}:2379
+advertise-client-urls: http://{{ cluster[ansible_hostname] }}:2379
 
 # Discovery URL used to bootstrap the cluster.
 # discovery:
@@ -58,7 +58,7 @@ advertise-client-urls: http://{{ ansible_default_ipv4.address }}:2379
 # discovery-srv:
 
 # Initial cluster configuration for bootstrapping.
-initial-cluster: {% for host in groups['etcd_cluster'] %}{{ hostvars[host]['ansible_hostname'] }}=http://{{ hostvars[host]['ansible_default_ipv4']['address'] }}:2380{% if not loop.last %},{% endif %}{% endfor %}
+initial-cluster: {% for host, ip in cluster.items() %}{{ host }}=http://{{ ip }}:2380{% if not loop.last %},{% endif %}{% endfor %}
 
 # Initial cluster token for the etcd cluster during bootstrap.
 initial-cluster-token: '{{ etcd_cluster_name }}'

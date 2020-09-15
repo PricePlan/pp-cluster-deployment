@@ -1,0 +1,15 @@
+---
+
+- block:
+  - name: ensure glibc-langpacks installed
+    dnf:
+      name: '{{ item }}'
+    loop:
+      - glibc-langpack-en
+      - glibc-langpack-ru
+    when: ansible_os_family == 'RedHat' and
+          ansible_distribution_major_version >= '8'
+
+  become: yes
+  tags:
+    - locales

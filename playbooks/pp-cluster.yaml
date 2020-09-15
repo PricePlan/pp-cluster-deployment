@@ -7,7 +7,13 @@
   gather_facts: yes
 
   roles:
-    # - role: timezone
+    - role: timezone
+      tags:
+      - timezone
+
+    - role: locales
+      tags:
+      - locales
 
     - role: ntp
       tags:
@@ -24,7 +30,7 @@
       - etcd
       - etcd_conf
 
-    - role: postgres
+    - role: postgresql
       when: '"postgres_cluster" in group_names'
       tags:
       - postgres
@@ -34,9 +40,15 @@
       tags:
       - patroni
 
-    # - role: postgres_users
+    - role: postgresql-users
+      when: '"master" in group_names and postgres_users | length > 0'
+      tags:
+      - postgres_users
 
-    # - role: postgres_databases
+    - role: postgresql-databases
+      when: '"master" in group_names and postgres_users | length > 0'
+      tags:
+      - postgres_dbs
 
     - role: pgbouncer
       when: '"postgres_cluster" in group_names'
@@ -47,16 +59,3 @@
       when: '"postgres_cluster" in group_names'
       tags:
       - haproxy
-
-
-    # - role: postgresql-users
-    #   when: is_master == "true" and postgresql_users | length > 0
-
-    # - role: postgresql-databases
-    #   when: is_master == "true" and postgresql_databases | length > 0
-
-    # - role: postgresql-extensions
-    #   when: is_master == "true" and postgresql_extensions | length > 0
-
-    # - role: pgbouncer/userlist
-    #   when: pgbouncer_install|bool and pgbouncer_generate_userlist|boo

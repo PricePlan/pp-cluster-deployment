@@ -1,0 +1,16 @@
+# Playbook to prepare hosts for ansible
+---
+- name: prepare new hosts to work with Ansible
+  hosts: pp_cluster
+  gather_facts: no
+
+  tasks:
+  - name: print vars
+    debug:
+      var: '{{ item }}'
+    loop:
+      - cluster
+      - etcd_hosts_ports
+      - initial_master_nodes
+      - elasticsearch_hosts
+

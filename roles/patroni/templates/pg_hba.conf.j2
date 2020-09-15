@@ -9,6 +9,6 @@
 # Allow replication connections from localhost, by a user with the
 # replication privilege.
 host    replication     {{ patroni_replication_username }}      127.0.0.1/32            md5
-{% for host in cluster %}
-host    replication     {{ patroni_replication_username }}      {{ host.ip }}/32           md5
+{% for host, ip in cluster.items() %}
+host    replication     {{ patroni_replication_username }}      {{ ip }}/32           md5
 {% endfor %}

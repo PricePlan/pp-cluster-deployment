@@ -1,0 +1,16 @@
+- name: ensure PostgreSQL databases are present
+  become: true
+  become_user: postgres
+  postgresql_db:
+    name: '{{ item.db }}'
+    owner: '{{ item.owner }}'
+    encoding: '{{ item.encoding | default("UTF-8") }}'
+    lc_collate: '{{ item.lc_collate | default("en_US.UTF-8") }}'
+    lc_ctype: '{{ item.lc_ctype | default("en_US.UTF-8") }}'
+    port: '{{ postgres_port }}'
+    template: template0
+    state: present
+  ignore_errors: true
+  loop: '{{ postgres_databases }}'
+  when: 'postgres_databases is defined and postgres_databases | length > 0'
+  tags: postgres_dbs

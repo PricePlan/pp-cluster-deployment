@@ -78,8 +78,8 @@ backend postgres
 
   default-server inter 3s fall 3 rise 2
 
-{% for host in cluster %}
-  server {{ host.name }} {{ host.ip }}:{{ pgbouncer_listen_port }} maxconn 500 check port 8008
+{% for host, ip in cluster.items() %}
+  server {{ host }} {{ ip }}:{{ pgbouncer_listen_port }} maxconn 500 check port 8008
 {% endfor %}
 
 

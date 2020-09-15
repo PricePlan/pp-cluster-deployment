@@ -67,6 +67,8 @@
     volumes: '{{ etcd_volumes }}'
 
     restart_policy: always
-  tags: etcd
+  become: yes
+  tags:
+    - etcd_container
 
   register: docker_etcd_installed

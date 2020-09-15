@@ -1,3 +1,4 @@
+# -
 scope: {{ postgres_cluster_name }}
 namespace: /service/
 name: {{ ansible_hostname }}
@@ -49,7 +50,7 @@ bootstrap:
 
 postgresql:
   listen: 0.0.0.0:5432
-  connect_address: {{ ansible_default_ipv4.address }}:5432
+  connect_address: {{ cluster[ansible_hostname] }}:5432
   data_dir: {{ postgres_data_dir }}
   bin_dir: {{ postgres_bin_dir }}
   config_dir: {{ postgres_data_dir }}

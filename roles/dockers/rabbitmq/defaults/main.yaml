@@ -1,0 +1,53 @@
+# Default values of 'dockers/rabbitmq' role
+rabbitmq_version: '3.8'
+rabbitmq_image_variant: 'alpine'
+rabbitmq_image_name:
+  "rabbitmq\
+  {% if rabbitmq_version %}:{{ rabbitmq_version }}{% endif %}\
+  {% if rabbitmq_image_variant %}-{{ rabbitmq_image_variant }}{% endif %}"
+
+rabbitmq_ip: 127.0.0.1
+rabbitmq_port: '5672'
+
+rabbitmq_container_name: rabbitmq
+
+rabbitmq_network_mode: host
+rabbitmq_etc_hosts: {}
+
+rabbitmq_log_driver: json-file
+rabbitmq_log_options:
+  mode: non-blocking
+  max-buffer-size: '4m'
+
+rabbitmq_exposed_ports:
+  - '{{ rabbitmq_port }}'
+
+rabbitmq_published_ports: []
+#  - '{{ rabbitmq_ip }}:{{ rabbitmq_port }}:{{ rabbitmq_port }}'
+
+rabbitmq_dir: /var/lib/rabbitmq
+rabbitmq_config_dir: /etc/rabbitmq
+
+rabbitmq_volumes:
+  - '{{ rabbitmq_dir }}:{{ rabbitmq_dir }}:rw'
+  - '{{ rabbitmq_config_dir }}:{{ rabbitmq_config_dir }}:rw'
+
+rabbitmq_user: '{{ amqp_user | default("guest")}}'
+rabbitmq_password: '{{ amqp_password | default("guest")}}'
+rabbit_auth_cookie: 'VerySecretString'
+
+rabbitmq_environment:
+  RABBITMQ_DEFAULT_USER: '{{ rabbitmq_user }}'
+  RABBITMQ_DEFAULT_PASS: '{{ rabbitmq_password }}'
+  RABBITMQ_DEFAULT_VHOST: '{{ rabbitmq_default_vhost | default("priceplan") }}'
+  RABBITMQ_ENABLED_PLUGINS_FILE: '{{ rabbitmq_dir }}/plugins.conf'
+  # RABBITMQ_HIPE_COMPILE: 1
+  # RABBITMQ_ERLANG_COOKIE: '{{ rabbit_auth_cookie }}' Deprecated!!!
+
+rabbitmq_uid: '100'
+rabbitmq_gid: '101'
+
+rabbitmq_plugins:
+  - rabbitmq_management
+
+rabbitmq_cluster_name: mq_cluster

@@ -68,3 +68,8 @@
       when: '"redis_cluster" in group_names'
       tags:
       - redis
+
+    - role: 'dockers/rabbitmq'
+      when: '"rabbitmq_cluster" in group_names'
+      tags:
+      - rabbitmq

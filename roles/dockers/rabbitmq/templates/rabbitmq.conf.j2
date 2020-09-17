@@ -1,0 +1,15 @@
+### rabbitmq.conf ###
+
+loopback_users.guest = false
+listeners.tcp.default = {{ rabbitmq_port }}
+default_pass = {{ rabbitmq_password }}
+default_user = {{ rabbitmq_user }}
+default_vhost = {{ rabbitmq_default_vhost | default("priceplan") }}
+hipe_compile = false
+
+
+cluster_name = {{ rabbitmq_cluster_name }}
+
+{% for host in rabbitmq_hosts -%}
+cluster_formation.classic_config.nodes.{{ loop.index }} = rabbit@{{ host }}
+{% endfor -%}

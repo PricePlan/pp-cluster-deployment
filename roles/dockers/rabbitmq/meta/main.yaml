@@ -1,0 +1,7 @@
+# Dependencies of 'rabbitmq.docker' role
+---
+dependencies:
+  - role: docker
+    when: deep
+    tags:
+      - docker

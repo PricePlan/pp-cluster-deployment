@@ -1,0 +1,87 @@
+# Tasks of 'dockers/rabbitmq' role
+---
+- block:
+  - name: ensure data directory has proper access mode
+    file:
+      path: '{{ rabbitmq_dir }}'
+      state: directory
+      owner: '{{ rabbitmq_uid }}'
+      group: '{{ rabbitmq_gid }}'
+      mode: '0700'
+
+  - name: ensure /etc/rabbitmq directory has proper access mode
+    file:
+      path: '{{ rabbitmq_config_dir }}'
+      state: directory
+      owner: '{{ rabbitmq_uid }}'
+      group: '{{ rabbitmq_gid }}'
+      mode: '0700'
+
+  - name: ensure rabbitmq.conf etc. is up to date
+    template:
+      src: '{{ item }}.j2'
+      dest: '{{ rabbitmq_config_dir }}/{{ item }}'
+      owner: '{{ rabbitmq_uid }}'
+      group: '{{ rabbitmq_gid }}'
+      mode: '0600'
+    loop:
+      - rabbitmq.conf
+      - plugins.conf
+    tags:
+      - rabbitmq_conf
+
+  - name: ensure ".erlang.cookie" file is under control
+    template:
+      src: erlang_cookie.j2
+      dest: '{{ rabbitmq_dir }}/.erlang.cookie'
+      owner: '{{ rabbitmq_uid }}'
+      group: '{{ rabbitmq_gid }}'
+      mode: '0600'
+    tags:
+      - rabbitmq_conf
+
+  - name: set options for file based log driver
+    set_fact:
+      rabbitmq_log_options: '{{ rabbitmq_log_options | combine(drv_opts) }}'
+    vars:
+      drv_opts:
+        max-size: '10m'
+        max-file: '3'
+    when: rabbitmq_log_driver == 'json-file'
+    tags:
+      - rabbitmq_container
+
+  - name: set options for GELF log driver
+    set_fact:
+      rabbitmq_log_options: '{{ rabbitmq_log_options | combine(drv_opts) }}'
+    vars:
+      drv_opts:
+        gelf-address: 'udp://127.0.0.1:{{ logstash_gelf_udp_port }}'
+    when: rabbitmq_log_driver == 'gelf'
+    tags:
+      - rabbitmq_container
+
+  - name: create a rabbitmq container
+    docker_container:
+      name: '{{ rabbitmq_container_name }}'
+      image: '{{ rabbitmq_image_name }}'
+      pull: '{{ docker_pull }}'
+      state: started
+      recreate: yes
+      exposed_ports: '{{ rabbitmq_exposed_ports }}'
+      published_ports: '{{ rabbitmq_published_ports }}'
+      env: '{{ rabbitmq_environment }}'
+      volumes: '{{ rabbitmq_volumes }}'
+
+      log_driver: '{{ rabbitmq_log_driver }}'
+      log_options: '{{ rabbitmq_log_options }}'
+
+      network_mode: '{{ rabbitmq_network_mode }}'
+      etc_hosts: '{{ rabbitmq_etc_hosts }}'
+
+      restart_policy: always
+    register: rabbitmq_docker_installed
+    tags:
+      - rabbitmq_container
+
+  become: yes

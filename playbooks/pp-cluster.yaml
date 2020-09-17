@@ -7,6 +7,10 @@
   gather_facts: yes
 
   roles:
+    - role: transparent_huge_pages
+      tags:
+      - disable_thp
+
     - role: timezone
       tags:
       - timezone
@@ -59,3 +63,8 @@
       when: '"postgres_cluster" in group_names'
       tags:
       - haproxy
+
+    - role: 'dockers/redis'
+      when: '"redis_cluster" in group_names'
+      tags:
+      - redis

@@ -1,0 +1,62 @@
+# Default values of 'dockers/redis' role
+redis_version: '6'
+redis_image_variant: 'alpine'
+redis_image_name:
+  "redis\
+  {% if redis_version %}:{{ redis_version }}{% endif %}\
+  {% if redis_image_variant %}-{{ redis_image_variant }}{% endif %}"
+
+redis_ip: 0.0.0.0
+redis_port: 6379
+redis_bind: '{{ redis_ip }}:{{ redis_port }}'
+
+redis_network_mode: host
+redis_log_driver: json-file
+redis_log_options:
+  mode: non-blocking
+  max-buffer-size: 4m
+
+nonhost_redis_published_ports:
+  - '{{ redis_ip }}:{{ redis_port }}:{{ redis_port }}'
+
+redis_published_ports: '{% if redis_network_mode == "host" %}[]
+  {% else %}{{ nonhost_redis_published_ports }}{% endif %}'
+
+
+redis_container_name: redis
+
+redis_data: '{{ sites_home }}/redis-data'
+redis_config_dir: /etc/redis
+
+redis_volumes:
+  - '{{ redis_data }}:/data:rw'
+  - '{{ redis_config_dir }}/redis.conf:{{ redis_config_dir }}/redis.conf:rw'
+
+redis_command: 'redis-server {{ redis_config_dir }}/redis.conf'
+redis_sysctls: {}
+#  'vm.overcommit_memory': '1'
+redis_environment: {}
+
+redis_uid: '999'
+redis_gid: '1000'
+
+redis_timeout: 600
+redis_min_replicas_to_write: 1
+redis_sentinel_user: sentinel_user
+redis_sentinel_password: sentinel_password
+redis_replica_user: 'replica-user'
+redis_replica_password: replica_user_password
+
+redis_master: redis-master
+
+redis_sentinel_published_ports: []
+redis_sentinel_environment: {}
+redis_sentinel_volumes:
+  - '{{ redis_data }}:/data:rw'
+  - '{{ redis_config_dir }}/sentinel.conf:{{ redis_config_dir }}/sentinel.conf:rw'
+redis_sentinel_command: 'redis-sentinel {{ redis_config_dir }}/sentinel.conf'
+
+redis_sentinel_bind: 0.0.0.0
+redis_sentinel_port: 26379
+redis_sentinel_master_down_timeout: 15000
+redis_sentinel_failover_timeout: 30000

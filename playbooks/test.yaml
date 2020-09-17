@@ -13,4 +13,5 @@
       - etcd_hosts_ports
       - initial_master_nodes
       - elasticsearch_hosts
-
+      - redis_master_host
+      - redis_master_ip

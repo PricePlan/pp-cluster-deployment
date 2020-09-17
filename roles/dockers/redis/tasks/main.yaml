@@ -1,0 +1,131 @@
+# Tasks of 'dockers/redis' role
+---
+- name: set options for file based log driver
+  set_fact:
+    redis_log_options: '{{ redis_log_options | combine(drv_opts) }}'
+  vars:
+    drv_opts:
+      max-size: '10m'
+      max-file: '3'
+  when: redis_log_driver == 'json-file'
+
+- name: set options for GELF log driver
+  set_fact:
+    redis_log_options: '{{ redis_log_options | combine(drv_opts) }}'
+  vars:
+    drv_opts:
+      gelf-address: 'udp://127.0.0.1:{{ logstash_gelf_udp_port }}'
+  when: redis_log_driver == 'gelf'
+
+- block:
+  - name: ensure data directory has proper access mode
+    file:
+      path: '{{ redis_data }}'
+      state: directory
+      owner: '{{ redis_uid }}'
+      group: '{{ redis_gid }}'
+      mode: '0755'
+
+  - name: ensure config directory exists and has proper access mode
+    file:
+      path: '{{ redis_config_dir }}'
+      state: directory
+      owner: '{{ redis_uid }}'
+      group: '{{ redis_gid }}'
+      mode: '0755'
+    tags:
+      - redis_conf
+
+  - name: ensure redis.conf is up to date
+    template:
+      src: redis.conf.j2
+      dest: '{{ redis_config_dir }}/redis.conf'
+      owner: '{{ redis_uid }}'
+      group: '{{ redis_gid }}'
+      mode: 0640
+    register: redis_config
+    # notify: 'restart redis'
+    tags:
+      - redis_conf
+
+  - name: ensure "vm.overcommit_memory" is set
+    sysctl:
+      name: vm.overcommit_memory
+      value: '1'
+      sysctl_set: yes
+      state: present
+      reload: yes
+    tags:
+      - redis_sysctl
+
+  - name: sentinels is stopped
+    docker_container:
+      name: '{{ redis_container_name }}-sentinel'
+      state: stopped
+
+  - name: create a redis container
+    docker_container:
+      name: '{{ redis_container_name }}'
+      image: '{{ redis_image_name }}'
+      state: started
+      pull: '{{ docker_pull }}'
+      recreate: yes
+      published_ports: '{{ redis_published_ports | from_yaml }}'
+      env: '{{ redis_environment | from_yaml }}'
+      volumes: '{{ redis_volumes | from_yaml }}'
+      log_driver: '{{ redis_log_driver }}'
+      log_options: '{{ redis_log_options }}'
+      network_mode: '{{ redis_network_mode }}'
+      restart_policy: always
+      sysctls: '{{ redis_sysctls | from_yaml }}'
+      command: '{{ redis_command }}'
+    register: redis_docker_installed
+
+  - name: check Redis is accepting connections
+    command: '/usr/sbin/ss -lnf inet'
+    register: redis_is_ready
+    until: redis_is_ready.stdout and redis_bind in redis_is_ready.stdout
+    retries: 15
+    delay: 5
+    changed_when: false
+    tags:
+      - redis_sentinel
+
+  - name: show us redis_is_ready
+    debug: var=redis_is_ready verbosity=2
+    tags:
+      - redis_sentinel
+
+  - name: ensure sentinel.conf is up to date
+    template:
+      src: sentinel.conf.j2
+      dest: '{{ redis_config_dir }}/sentinel.conf'
+      owner: '{{ redis_uid }}'
+      group: '{{ redis_gid }}'
+      mode: 0640
+    register: sentinel_config
+    tags:
+      - redis_sentinel
+      - sentinel_conf
+
+  - name: create a redis-sentinel container
+    docker_container:
+      name: '{{ redis_container_name }}-sentinel'
+      image: '{{ redis_image_name }}'
+      state: started
+      pull: '{{ docker_pull }}'
+      recreate: yes
+      published_ports: '{{ redis_sentinel_published_ports | from_yaml }}'
+      env: '{{ redis_sentinel_environment | from_yaml }}'
+      volumes: '{{ redis_sentinel_volumes | from_yaml }}'
+      log_driver: '{{ redis_log_driver }}'
+      log_options: '{{ redis_log_options }}'
+      network_mode: '{{ redis_network_mode }}'
+      restart_policy: always
+      sysctls: '{{ redis_sysctls | from_yaml }}'
+      command: '{{ redis_sentinel_command }}'
+    register: sentinel_docker_installed
+    tags:
+      - redis_sentinel
+
+  become: yes

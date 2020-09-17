@@ -20,7 +20,8 @@ pp_cluster
 [nginx]
 
 
-[redis]
+[redis_cluster:children]
+pp_cluster
 
 
 [rabbitmq]

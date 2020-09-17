@@ -1,0 +1,18 @@
+---
+- block:
+  - name: ensure systemd "disable-transparent-huge-pages.service" is up to date
+    template:
+      src: disable-transparent-huge-pages.service.j2
+      dest: /etc/systemd/system/disable-transparent-huge-pages.service
+      owner: root
+      group: root
+      mode: 0644
+    notify: 'restart disable-thp'
+    when: disable_thp is defined and disable_thp | bool
+    tags:
+      - disable_thp
+
+  - name: flush handlers immediately
+    meta: flush_handlers
+
+  become: true

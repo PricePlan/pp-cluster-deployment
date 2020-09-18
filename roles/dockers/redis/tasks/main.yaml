@@ -62,6 +62,10 @@
     docker_container:
       name: '{{ redis_container_name }}-sentinel'
       state: stopped
+    register: redis_sentinel_stop
+    failed_when: '"image is not specified" not in redis_sentinel_stop.msg'
+    tags:
+      - redis_sentinel
 
   - name: create a redis container
     docker_container:

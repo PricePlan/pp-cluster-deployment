@@ -1,0 +1,46 @@
+# Tasks of 'dockers/logstash' role
+---
+- block:
+  - name: ensure pipeline directory exists
+    file:
+      path: '{{ logstash_pipeline_dir }}'
+      state: directory
+      owner: root
+      group: '{{ logstash_gid }}'
+      mode: '0755'
+    tags:
+      - logstash_conf
+
+  - name: ensure pipeline/logstash.conf is up to date
+    template:
+      src: pipeline-logstash.conf.j2
+      dest: '{{ logstash_pipeline_dir }}/logstash.conf'
+      owner: '{{ logstash_uid }}'
+      group: '{{ logstash_gid }}'
+      mode: '0644'
+    tags:
+      - logstash_conf
+
+  - name: create a Logstash container
+    docker_container:
+      name: '{{ logstash_container_name }}'
+      image: '{{ logstash_image_name }}'
+      pull: '{{ docker_pull }}'
+      state: started
+      recreate: yes
+
+      log_driver: '{{ logstash_log_driver }}'
+      log_options: '{{ logstash_log_options }}'
+      network_mode: '{{ logstash_network_mode }}'
+
+      etc_hosts: '{{ logstash_etc_hosts }}'
+
+      exposed_ports: '{{ logstash_exposed_ports }}'
+      published_ports: '{{ logstash_published_ports }}'
+      env: '{{ logstash_environment }}'
+      volumes: '{{ logstash_volumes }}'
+      links: '{{ logstash_links }}'
+      restart_policy: always
+    register: docker_logstash_installed
+
+  become: yes

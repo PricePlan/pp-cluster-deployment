@@ -1,0 +1,32 @@
+# Tasks of 'assist/webfront-kibana' role
+- block:
+  - name: ensure nginx vhost config is up to date
+    template:
+      src: 'vhost-kibana.priceplan.pro.j2'
+      dest: '{{ nginx_config_dir }}/sites-available/{{ kibana_vhost }}'
+      owner: root
+      group: '{{ nginx_gid }}'
+      mode: '0640'
+    register: kibana_vhost_config
+    notify: reload nginx_docker
+
+  - name: create link in sites-enabled
+    file:
+      src: '{{ nginx_config_dir }}/sites-available/{{ kibana_vhost }}'
+      dest: '{{ nginx_config_dir }}/sites-enabled/{{ kibana_vhost }}'
+      state: link
+    when: kibana_vhost_config.changed
+    notify: reload nginx_docker
+
+  - name: ensure basic аuthentication file is up to date
+    template:
+      src: kibana.htpasswd.j2
+      dest: '{{ kibana_htpasswd }}'
+      owner: 'root'
+      group: '{{ nginx_gid }}'
+      mode: '0640'
+    notify: reload nginx_docker
+
+  become: yes
+  tags:
+    - kibana_front

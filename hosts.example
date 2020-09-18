@@ -16,24 +16,23 @@ pp_cluster
 [postgres_cluster:children]
 pp_cluster
 
-
-[nginx]
-
-
 [redis_cluster:children]
 pp_cluster
 
+[rabbitmq_cluster:children]
+pp_cluster
 
-[rabbitmq]
+[elasticsearch_cluster:children]
+pp_cluster
 
+[logstash:children]
+pp_cluster
 
-[elasticsearch]
+[nginx:children]
+pp_cluster
 
+[kibana:children]
+pp_cluster
 
-[kibana]
-
-
-[logstash]
-
-
-[webfront]
+[webfront:children]
+pp_cluster

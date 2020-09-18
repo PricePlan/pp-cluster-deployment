@@ -1,0 +1,37 @@
+input {
+  udp {
+    port => {{ logstash_udp_port }}
+    codec => msgpack
+  }
+  gelf {
+    id => "gelf"
+    port_udp => {{ logstash_gelf_udp_port }}
+    type => gelf
+  }
+}
+
+filter {
+  if [type] == "python-logstash" {
+    mutate {
+      remove_field => "type"
+    }
+  }
+
+  if [type] == "gelf" {
+    mutate {
+      remove_field => "level"
+    }
+  }
+}
+
+output {
+  elasticsearch {
+    {% if logstash_network_mode == "host" %}
+    hosts => {{ elasticsearch_hosts | from_yaml }}
+    {% else %}
+      hosts => [ {{ elasticsearch_container_name }}:{{ elasticsearch_port }} ]
+    {% endif %}
+    {# user => "{{ logstash_elastic_user }}" #}
+    {# password => "{{ logstash_elastic_password }}" #}
+  }
+}

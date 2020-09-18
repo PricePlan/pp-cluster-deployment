@@ -1,0 +1,58 @@
+# Default values of 'dockers/nginx' role
+---
+nginx_config_dir: /etc/nginx
+
+nginx_workers: 'auto'
+nginx_aio: 'off'
+
+dns_servers:
+  - 77.88.8.8
+  - 77.88.8.1
+  - 8.8.8.8
+  - 8.8.4.4
+
+nginx_version: '1.19'
+nginx_image_variant: 'alpine'
+nginx_image_name:
+  "nginx\
+  {% if nginx_version %}:{{ nginx_version }}{% endif %}\
+  {% if nginx_image_variant %}-{{ nginx_image_variant }}{% endif %}"
+
+nginx_container_name: nginx
+
+nginx_http_port: '80'
+nginx_https_port: '443'
+
+nginx_network_mode: host
+
+nginx_exposed_ports:
+  - '{{ nginx_http_port }}'
+  - '{{ nginx_https_port }}'
+
+nonhost_nginx_published_ports:
+ - '{{ nginx_http_port }}:{{ nginx_http_port }}'
+ - '{{ nginx_https_port }}:{{ nginx_https_port }}'
+
+nginx_published_ports: '{% if nginx_network_mode == "host" %}[]
+  {% else %}{{ nonhost_nginx_published_ports }}{% endif %}'
+
+nginx_volumes:
+  - '{{ nginx_config_dir }}/nginx.conf:{{ nginx_config_dir }}/nginx.conf:ro'
+  - '{{ nginx_config_dir }}/sites-available/:{{ nginx_config_dir }}/sites-available/:ro'
+  - '{{ nginx_config_dir }}/sites-enabled/:{{ nginx_config_dir }}/sites-enabled/:ro'
+  - '{{ nginx_config_dir }}/snippets/:{{ nginx_config_dir }}/snippets/:ro'
+  - '{{ nginx_config_dir }}/ssl/:{{ nginx_config_dir }}/ssl/:ro'
+  - '{{ nginx_config_dir }}/blacklist/:{{ nginx_config_dir }}/blacklist/:ro'
+  - '/etc/letsencrypt/:/etc/letsencrypt/:ro'
+  - /var/www/:/var/www/:ro
+  - '{{ sites_home }}:{{ sites_home }}:ro'
+  - '{{ static_home }}:{{ static_home }}:ro'
+  # - '{{ files_home }}:{{ files_home }}:ro'
+  - '/var/cache/nginx/:/var/cache/nginx/:rw'
+  - '/var/log/nginx/:/var/log/nginx/:rw'
+  - '/var/run/php/:/var/run/php/:rw'
+
+nginx_environment: {}
+
+nginx_uid: '100'
+nginx_gid: '101'

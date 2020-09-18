@@ -1,0 +1,7 @@
+# Dependencies of 'dockers/logstash' role
+---
+dependencies:
+  - role: docker
+    when: deep
+    tags:
+      - docker

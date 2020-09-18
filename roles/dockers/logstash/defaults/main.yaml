@@ -1,0 +1,47 @@
+# Default values of 'dockers/logstash' role
+---
+logstash_version: '{{ elk_version }}'
+logstash_oss: false
+logstash_image_name:
+  "docker.elastic.co/logstash/logstash{% if logstash_oss %}-oss{% endif %}\
+  {% if logstash_version %}:{{ logstash_version }}{% endif %}"
+
+logstash_ip: 0.0.0.0
+logstash_udp_port: '5045'
+logstash_gelf_udp_port: '5047'
+
+logstash_exposed_ports:
+  - '{{ logstash_udp_port }}/udp'
+  - '{{ logstash_gelf_udp_port }}/udp'
+
+logstash_published_ports: []
+
+logstash_container_name: logstash
+
+logstash_network_mode: host
+logstash_log_driver: json-file
+logstash_log_options:
+  mode: non-blocking
+  max-buffer-size: 4m
+
+logstash_etc_hosts:
+  elasticsearch: 127.0.0.1
+
+logstash_environment: {}
+
+nonhost_logstash_links:
+  - '{{ elasticsearch_container_name }}:{{ elasticsearch_container_name }}'
+logstash_links: '{% if logstash_network_mode == "host" %}[]
+  {% else %}{{ nonhost_logstash_links }}{% endif %}'
+
+logstash_config_dir: /etc/logstash
+logstash_pipeline_dir: '{{ logstash_config_dir }}/pipeline'
+
+logstash_volumes:
+  - '{{ logstash_pipeline_dir }}:/usr/share/logstash/pipeline:ro'
+
+logstash_uid: '1000'
+logstash_gid: '1000'
+
+logstash_elastic_user: logstash
+logstash_elastic_password: logstash_passwd

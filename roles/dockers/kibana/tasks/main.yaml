@@ -1,0 +1,44 @@
+# Tasks of 'dockers/kibana' role
+---
+- block:
+  - name: ensure Kibana config directory exists
+    file:
+      path: '{{ kibana_config_dir }}'
+      state: directory
+      owner: root
+      group: '{{ kibana_uid }}'
+      mode: '0750'
+    tags:
+      - kibana_conf
+
+  - name: ensure kibana.yml is up to date
+    template:
+      src: kibana.yml.j2
+      dest: '{{ kibana_config_dir }}/kibana.yml'
+      owner: root
+      group: '{{ kibana_uid }}'
+      mode: '0640'
+    tags:
+      - kibana_conf
+
+  - name: create a Kibana container
+    docker_container:
+      name: '{{ kibana_container_name }}'
+      image: '{{ kibana_image_name }}'
+      pull: '{{ docker_pull }}'
+      state: started
+      recreate: yes
+
+      log_driver: '{{ kibana_log_driver }}'
+      log_options: '{{ kibana_log_options }}'
+      network_mode: '{{ kibana_network_mode }}'
+
+      exposed_ports:
+        - '{{ kibana_port}}'
+      published_ports: []
+      env: '{{ kibana_environment }}'
+      links: '{{ kibana_links }}'
+      volumes: '{{ kibana_volumes | default([]) }}'
+      restart_policy: always
+
+  become: yes

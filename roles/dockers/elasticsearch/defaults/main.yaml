@@ -1,0 +1,44 @@
+# Default values of 'dockers/elasticsearch' role
+---
+elasticsearch_in_cluster: false
+max_map_count: '262144'
+
+elasticsearch_version: '{{ elk_version }}'
+elasticsearch_image_name:
+  "docker.elastic.co/elasticsearch/elasticsearch\
+  {% if elasticsearch_version %}:{{ elasticsearch_version }}{% endif %}"
+
+# elasticsearch_ip: 127.0.0.1
+elasticsearch_ip: 0.0.0.0
+elasticsearch_port: '9200'
+
+elasticsearch_container_name: elasticsearch
+
+elasticsearch_network_mode: host
+elasticsearch_log_driver: json-file
+elasticsearch_log_options:
+  mode: non-blocking
+  max-buffer-size: 4m
+
+nonhost_elasticsearch_published_ports:
+ - '{{ elasticsearch_ip }}:{{ elasticsearch_port }}:{{ elasticsearch_port }}'
+
+elasticsearch_published_ports: '{% if elasticsearch_network_mode == "host" %}[]
+  {% else %}{{ nonhost_elasticsearch_published_ports }}{% endif %}'
+
+elastic_user_name: elastic
+elastic_password: changeme
+
+elasticsearch_environment:
+  ES_JAVA_OPTS: '-Xms2g -Xmx2g'
+  ELASTIC_PASSWORD: '{{ elastic_password }}'
+
+elasticsearch_conf_dir: /etc/elasticsearch
+elasticsearch_data: '{{ sites_home }}/esdata'
+
+elasticsearch_volumes:
+  - '{{ elasticsearch_data }}:/usr/share/elasticsearch/data:rw'
+  - '{{ elasticsearch_conf_dir }}/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro'
+
+elasticsearch_uid: '1000'
+elasticsearch_gid: '1000'

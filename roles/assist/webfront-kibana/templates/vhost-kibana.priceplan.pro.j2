@@ -1,0 +1,34 @@
+upstream kibana {
+  {% for host, ip in cluster.items() -%}
+  {% if host in groups['kibana'] -%}
+  server {{ ip }}:{{ kibana_port }} fail_timeout=20s;
+  {% endif -%}
+  {% endfor -%}
+}
+
+# See https://mozilla.github.io/server-side-tls/ssl-config-generator/
+server {
+{% if 'production' in group_names %}
+  listen {{ nginx_https_ports }} ssl http2;
+  listen [::]:{{ nginx_https_port }} ssl http2;
+
+  ssl_certificate /etc/letsencrypt/live/priceplan.pro/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/priceplan.pro/privkey.pem;
+
+  include snippets/ssl.conf;
+{% else %}
+  listen {{ nginx_http_port }};
+  listen [::]:{{ nginx_http_port }};
+{% endif %}
+  server_name {{ kibana_vhost }};
+
+  access_log /var/log/nginx/{{ kibana_vhost }}.access_log main;
+  error_log /var/log/nginx/{{ kibana_vhost }}.error_log info;
+
+  location / {
+    proxy_pass http://kibana;
+
+    auth_basic "Administrator’s Area";
+    auth_basic_user_file {{ kibana_htpasswd }};
+  }
+}

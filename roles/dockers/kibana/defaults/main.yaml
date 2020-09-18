@@ -1,0 +1,46 @@
+# Default values of 'dockers/kibana' role
+---
+kibana_version: '{{ elk_version }}'
+kibana_oss: false
+kibana_image_name:
+  "docker.elastic.co/kibana/kibana{% if kibana_oss %}-oss{% endif %}\
+  {% if kibana_version %}:{{ kibana_version }}{% endif %}"
+
+kibana_ip: '{% if nginx_network_mode == "host" %}0.0.0.0
+  {% else %}{{ ansible_docker0.ipv4.address }}{% endif %}'
+
+kibana_port: '5601'
+
+kibana_container_name: kibana
+
+kibana_network_mode: host
+kibana_log_driver: json-file
+kibana_log_options:
+  mode: non-blocking
+  max-buffer-size: 4m
+
+nonhost_kibana_published_ports:
+- '{{ kibana_ip }}:{{ kibana_port }}:{{ kibana_port }}'
+
+kibana_published_ports:: '{% if kibana_network_mode == "host" %}[]
+  {% else %}{{ nonhost_kibana_published_ports }}{% endif %}'
+
+kibana_environment: {}
+
+nonhost_kibana_links:
+  - '{{ elasticsearch_container_name }}:{{ elasticsearch_container_name }}'
+
+kibana_links: '{% if kibana_network_mode == "host" %}[]
+  {% else %}{{ nonhost_kibana_links }}{% endif %}'
+
+kibana_vhost: 'kibana.{{ priceplan_http_hostname }}'
+# For nginx container mounted only nginx.conf in /etc/nginx
+kibana_htpasswd: '{{ nginx_config_dir }}/ssl/kibana.htpasswd'
+
+kibana_config_dir: /etc/kibana
+
+kibana_volumes:
+  - '{{ kibana_config_dir }}/kibana.yml:/usr/share/kibana/config/kibana.yml:ro'
+
+kibana_gid: '1000'
+kibana_uid: '1000'

@@ -1,0 +1,61 @@
+# Tasks of 'dockers/elasticsearch' role
+---
+- block:
+  - name: tune vm.max_map_count
+    sysctl:
+      name: vm.max_map_count
+      value: '{{ max_map_count }}'
+      state: present
+      reload: yes
+
+  - name: ensure esdata directory has proper access mode
+    file:
+      path: '{{ elasticsearch_data }}'
+      state: directory
+      owner: '{{ elasticsearch_uid }}'
+      group: '{{ elasticsearch_gid }}'
+      mode: '0755'
+
+  - name: 'ensure {{ elasticsearch_conf_dir }} directory exists'
+    file:
+      path: '{{ elasticsearch_conf_dir }}'
+      state: directory
+      owner: root
+      group: '{{ elasticsearch_gid }}'
+      mode: '0755'
+
+  - name: ensure elasticsearch.yml is up to date
+    template:
+      src: elasticsearch.yml.j2
+      dest: '{{ elasticsearch_conf_dir }}/elasticsearch.yml'
+      owner: root
+      group: '{{ elasticsearch_gid }}'
+      mode: '0644'
+
+  - name: create an Elasticsearch container
+    docker_container:
+      name: '{{ elasticsearch_container_name }}'
+      image: '{{ elasticsearch_image_name }}'
+      # | regex_replace("\s", "") }}'
+      state: started
+      pull: '{{ docker_pull }}'
+      # cleanup: yes
+      recreate: yes
+
+      log_driver: '{{ elasticsearch_log_driver }}'
+      log_options: '{{ elasticsearch_log_options }}'
+      network_mode: '{{ elasticsearch_network_mode }}'
+      etc_hosts: '{{ elasticsearch_etc_hosts }}'
+
+      exposed_ports:
+        - '{{ elasticsearch_port }}'
+      published_ports: '{{ elasticsearch_published_ports }}'
+      env: '{{ elasticsearch_environment }}'
+      volumes: '{{ elasticsearch_volumes }}'
+      ulimits:
+        - nofile:65536:65536
+        - memlock:-1:-1
+      restart_policy: always
+    register: docker_elasticsearch_installed
+
+  become: yes

@@ -1,0 +1,21 @@
+
+cluster.name: {{ elasticsearch_cluster_name | default('docker-cluster')}}
+network.host: {{ elasticsearch_ip | default('0.0.0.0')}}
+
+{% if not elasticsearch_in_cluster -%}
+
+# minimum_master_nodes need to be explicitly set when bound on a public IP
+# set to 1 to allow single node clusters
+# Details: https://github.com/elastic/elasticsearch/pull/17288
+discovery.zen.minimum_master_nodes: 1
+discovery.type: single-node
+
+{% else %}
+node.name: {{ ansible_hostname }}
+discovery.seed_hosts: {{ initial_master_nodes | difference([ansible_hostname,])}}
+cluster.initial_master_nodes: {{ initial_master_nodes }}
+
+{% endif -%}
+
+xpack.license.self_generated.type: basic
+bootstrap.memory_lock: true

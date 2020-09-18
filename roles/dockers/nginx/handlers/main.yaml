@@ -1,0 +1,11 @@
+---
+- name: restart nginx_docker
+  docker_container:
+    name: '{{ nginx_container_name }}'
+    # image: '{{ nginx_image_name }}'
+    state: started
+    restart: yes
+    trust_image_content: yes
+
+- name: reload nginx_docker
+  command: docker kill -s HUP {{ nginx_container_name }}

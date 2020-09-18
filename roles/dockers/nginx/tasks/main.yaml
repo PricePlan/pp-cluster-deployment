@@ -1,0 +1,80 @@
+# Tasks of 'dockers/nginx' role
+---
+- block:
+  - name: ensure {{ nginx_config_dir }} directory exists
+    file:
+      path: '{{ nginx_config_dir }}'
+      state: directory
+      owner: root
+      group: '{{ nginx_uid }}'
+      mode: '0750'
+
+  - name: update nginx main configuration file
+    template:
+      src: nginx.conf.j2
+      dest: '{{ nginx_config_dir }}/nginx.conf'
+      owner: root
+      group: '{{ nginx_uid }}'
+      mode: '0640'
+    notify: restart nginx_docker
+
+  - name: create a nginx container
+    docker_container:
+      name: '{{ nginx_container_name }}'
+      image: '{{ nginx_image_name }}'
+      state: started
+      pull: '{{ docker_pull }}'
+
+      recreate: yes
+      exposed_ports: '{{ nginx_exposed_ports | from_yaml }}'
+      published_ports: '{{ nginx_published_ports | from_yaml }}'
+      env: '{{ nginx_environment | from_yaml }}'
+      volumes: '{{ nginx_volumes | from_yaml }}'
+      restart_policy: always
+      network_mode: '{{ nginx_network_mode }}'
+    register: nginx_docker_installed
+
+  become: yes
+
+- block:
+  - name: ensure home directory for web projects exists
+    file:
+      path: '{{ sites_home }}'
+      state: directory
+    when: nginx_docker_installed.changed
+
+  - name: ensure directory for config snippets exists
+    file:
+      path: '{{ nginx_config_dir }}/snippets'
+      state: directory
+      owner: root
+      group: '{{ nginx_uid }}'
+      mode: '0750'
+    when: nginx_docker_installed.changed
+
+  - name: ensure ssl configuration snippet is up to date
+    template:
+      src: snippet-ssl.conf.j2
+      dest: '{{ nginx_config_dir }}/snippets/ssl.conf'
+      owner: root
+      group: '{{ nginx_uid }}'
+      mode: '0640'
+    notify: restart nginx_docker
+
+  - name: ensure logrotate configuration for nginx is up to date
+    template:
+      src: logrotate-nginx.j2
+      dest: /etc/logrotate.d/nginx
+    # notify: restart nginx_docker
+
+  - name: ensure working directory /var/cache/nginx has properly permissions
+    file:
+      path: /var/cache/nginx
+      state: directory
+      owner: '{{nginx_uid}}'
+      group: '{{nginx_gid}}'
+      mode: '0750'
+      recurse: yes
+    when: nginx_docker_installed.changed
+
+  become: yes

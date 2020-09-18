@@ -73,3 +73,33 @@
       when: '"rabbitmq_cluster" in group_names'
       tags:
       - rabbitmq
+
+    - role: 'dockers/elasticsearch'
+      when: '"elasticsearch_cluster" in group_names'
+      tags:
+      - elastic
+      - elk
+
+    - role: 'dockers/logstash'
+      when: '"logstash" in group_names'
+      tags:
+      - logstash
+      - elk
+
+    - role: 'dockers/nginx'
+      when: '"nginx" in group_names'
+      tags:
+      - nginx-server
+
+    - role: 'dockers/kibana'
+      when: '"kibana" in group_names'
+      tags:
+      - kibana
+      - elk
+
+    - role: assist/webfront-kibana
+      when: '"webfront" in group_names'
+      tags:
+      - kibana
+      - kibana_front
+      - elk

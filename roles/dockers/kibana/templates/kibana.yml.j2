@@ -1,0 +1,10 @@
+server:
+  host: {{ kibana_ip }}
+
+{% set hosts = cluster.keys() | difference([ansible_hostname]) -%}
+elasticsearch:
+  hosts:
+  - http://127.0.0.1:9200
+  {% for host in hosts -%}
+  - http://{{ cluster[host] }}:9200
+  {% endfor -%}

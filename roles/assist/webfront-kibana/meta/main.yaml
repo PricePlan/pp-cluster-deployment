@@ -1,0 +1,5 @@
+# Dependencies of 'assist/webfront-kibana' role
+---
+dependencies:
+  - role: dockers/nginx
+    when: deep | bool

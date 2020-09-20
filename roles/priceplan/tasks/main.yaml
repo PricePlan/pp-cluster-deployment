@@ -1,0 +1,42 @@
+- name: ensure settings is up to date
+  become: yes
+  template:
+    src: cluster.py.j2
+    dest: '{{ sites_home }}/{{ settings_module_name }}.py'
+    owner: '{{ pp_uid }}'
+    group: '{{ pp_gid }}'
+    mode: '0440'
+  tags:
+    - pp_conf
+
+- name: log into PricePlan registry
+  docker_login:
+    registry: registry.priceplan.pro
+    username: '{{ registry_user }}'
+    password: '{{ registry_password }}'
+    # reauthorize: yes
+
+- name: run UWSGI
+  docker_container:
+    name: '{{ pp_uwsgi_container_name }}'
+    image: '{{ pp_image_name }}'
+    pull: '{{ docker_pull }}'
+    state: started
+    recreate: yes
+
+    log_driver: '{{ pp_log_driver }}'
+    log_options: '{{ pp_log_options }}'
+    network_mode: '{{ pp_network_mode }}'
+
+    exposed_ports: []
+    published_ports: []
+    env: '{{ pp_environment }}'
+    links: '{{ pp_links }}'
+    volumes: '{{ pp_volumes | default([]) }}'
+    restart_policy: always
+    command: ["uwsgi", ]
+
+- name: Log out of PricePlan registry
+  docker_login:
+    registry: registry.priceplan.pro
+    state: absent

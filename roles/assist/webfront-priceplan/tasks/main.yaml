@@ -1,0 +1,67 @@
+# Tasks of 'assist/webfront-priceplan' role
+---
+- block:
+  # - name: ensure vhost SSL certificates is up to date
+  #   copy: src='{{ inventory_dir }}/files/keys/{{ item }}'
+  #     dest='{{ nginx_config_dir }}/ssl/'
+  #     owner=root group=root mode=0644
+  #   with_items:
+  #     - priceplan.crt
+  #     - priceplan.key
+  #   register: vhost_certificates
+  #   notify: reload nginx_docker
+  #   tags:
+  #     - settings
+  #     - nginx
+
+  - name: ensure blacklist configuration file exists
+    file:
+      path: '{{ nginx_config_dir }}/blacklist/{{ pp_http_hostname }}.conf'
+      owner: root
+      group: root
+      mode: 0644
+      state: touch
+    register: blacklist_priceplan
+    notify: reload nginx_docker
+    tags:
+      - settings
+      - nginx
+
+  - name: ensure snippet with HTTP/HTTPS common config is up to date
+    template:
+      src: snippet-priceplan.conf.j2
+      dest: '{{ nginx_config_dir }}/snippets/priceplan.conf'
+      owner: root
+      group: root
+      mode: 0644
+    register: vhost_snippet
+    notify: reload nginx_docker
+    tags:
+      - settings
+      - nginx
+
+  - name: ensure nginx vhost config is up to date
+    template:
+      src: vhost-priceplan.j2
+      dest: '{{ nginx_config_dir }}/sites-available/{{ pp_http_hostname }}'
+      owner: root
+      group: root
+      mode: 0644
+    register: vhost_config
+    notify: reload nginx_docker
+    tags:
+      - settings
+      - nginx
+
+  - name: create link in sites-enabled
+    file:
+      src: '{{ nginx_config_dir }}/sites-available/{{ pp_http_hostname }}'
+      dest: '{{ nginx_config_dir }}/sites-enabled/{{ pp_http_hostname }}'
+      state: link
+    when: vhost_config.changed or force
+    notify: reload nginx_docker
+    tags:
+      - settings
+      - nginx
+
+  become: yes

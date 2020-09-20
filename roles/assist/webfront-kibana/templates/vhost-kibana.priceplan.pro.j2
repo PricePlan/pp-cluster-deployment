@@ -9,7 +9,7 @@ upstream kibana {
 # See https://mozilla.github.io/server-side-tls/ssl-config-generator/
 server {
 {% if 'production' in group_names %}
-  listen {{ nginx_https_ports }} ssl http2;
+  listen {{ nginx_https_port }} ssl http2;
   listen [::]:{{ nginx_https_port }} ssl http2;
 
   ssl_certificate /etc/letsencrypt/live/priceplan.pro/fullchain.pem;

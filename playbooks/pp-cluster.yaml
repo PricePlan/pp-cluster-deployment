@@ -103,3 +103,14 @@
       - kibana
       - kibana_front
       - elk
+
+    - role: priceplan
+      when: '"pp_cluster" in group_names'
+      tags:
+      - pp
+
+    - role: assist/webfront-priceplan
+      when: '"webfront" in group_names'
+      tags:
+      - backend
+      - webfront

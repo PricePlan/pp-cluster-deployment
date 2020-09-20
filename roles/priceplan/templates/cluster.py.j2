@@ -1,0 +1,62 @@
+# encoding: utf-8
+"""
+PricePlan DOCKER PRODUCTION settings from OS environment.
+
+"""
+from __future__ import unicode_literals
+
+from .docker import *  # pylint:disable=wildcard-import,unused-wildcard-import
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': '{{ pp_postgres_db }}',
+        'USER': '{{ pp_postgres_user }}',
+        'PASSWORD': '{{ pp_postgres_password }}',
+        'HOST': '127.0.0.1',
+        'PORT': {{ haproxy_frontend_pg_port }},
+        'CONN_MAX_AGE': 30,
+        'OPTIONS': {
+            'client_encoding': 'UTF8',
+        },
+        'ATOMIC_REQUESTS': True,
+        'DISABLE_SERVER_SIDE_CURSORS': True, # For PgBouncer
+    }
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'redis_cache.RedisCache',
+        'LOCATION': [
+            '127.0.0.1:6379'
+        ],
+        'OPTIONS': {
+            'DB': REDIS_DBS['django_cache'],
+            'PARSER_CLASS': 'redis.connection.HiredisParser',
+            'CONNECTION_POOL_CLASS': 'redis.BlockingConnectionPool',
+            'CONNECTION_POOL_CLASS_KWARGS': {
+                'max_connections': 50,
+                'timeout': 20,
+            },
+            'MAX_CONNECTIONS': 1000,
+            'PICKLE_VERSION':-1,
+        }
+    }
+}
+
+CELERY_BROKER_URL = 'pyamqp://{{ amqp_user }}:{{ amqp_password }}' \
+    '@127.0.0.1:5672/{{ rabbitmq_default_vhost }}'
+
+CELERY_RESULT_BACKEND = 'redis://{redis_host}:{redis_port}/{db}'.format(
+    redis_host='127.0.0.1', redis_port=6379,
+    db=REDIS_DBS['celery_result'])
+
+ELASTICSEARCH_CONNECTIONS = [
+    'http://127.0.0.1:9200',
+    {% for host, ip in cluster.items() -%}
+    {% if host != ansible_hostname -%}
+    'http://{{ ip }}:9200',
+    {% endif -%}
+    {% endfor -%}
+]

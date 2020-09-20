@@ -1,0 +1,90 @@
+  # charset utf-8;
+  client_max_body_size 48m;
+
+  root /var/www/{{ pp_http_hostname }}/htdocs;
+
+  include blacklist/{{ pp_http_hostname }}.conf;
+
+  location / {
+    rewrite ^/favicon.ico$ /static/favicon.ico permanent;
+    try_files $uri @proxy;
+  }
+
+  location @proxy {
+    uwsgi_pass  uwsgi_pp;
+    include     /etc/nginx/uwsgi_params;
+    uwsgi_read_timeout 600;
+
+    # proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    # # enable this if and only if you use HTTPS
+    # proxy_set_header X-Forwarded-Proto https;
+    # proxy_set_header Host $http_host;
+    # # we don't want nginx trying to do something clever with
+    # # redirects, we set the Host: header above already.
+    # proxy_redirect off;
+    # proxy_pass http://uwsgi;
+
+    proxy_intercept_errors on;
+  }
+
+  error_page 500 502 503 504 /502.html;
+
+  location /admin {
+    return 403;
+  }
+
+  {# location /media {
+    alias {{ backend_media_dir }};
+
+    proxy_redirect off;
+    client_max_body_size 1m;
+    client_body_buffer_size 256k;
+    proxy_connect_timeout 1s;
+    proxy_send_timeout 5s;
+    proxy_read_timeout 5s;
+    proxy_buffer_size 4k;
+    proxy_buffers 8 64k;
+    # proxy_busy_buffers_size 64k;
+    # proxy_temp_file_write_size 64k
+
+    aio on;
+    directio 512;
+    output_buffers 8 256k;
+
+    sendfile on;
+    sendfile_max_chunk 1m;
+    tcp_nopush on;
+    tcp_nodelay on;
+
+    expires 30d;
+    access_log off;
+  }
+
+  location /static {
+    alias {{ backend_static_dir }};
+    aio on;
+    directio 512;
+    output_buffers 8 256k;
+
+    sendfile on;
+    sendfile_max_chunk 1m;
+    tcp_nopush on;
+    tcp_nodelay on;
+
+    expires 30d;
+    access_log off;
+  }
+
+  location {{ files_path }} {
+    alias {{ backend_files_dir }};
+    aio on;
+    directio 512;
+    output_buffers 8 256k;
+
+    sendfile on;
+    sendfile_max_chunk 8m;
+    tcp_nopush on;
+    tcp_nodelay on;
+
+    expires 3d;
+  } #}

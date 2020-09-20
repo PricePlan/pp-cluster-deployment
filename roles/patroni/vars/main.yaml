@@ -3,6 +3,7 @@
 patroni_os_packages:
   - virtualenv
   - python3-psutil
+  - python3-psycopg2
 
 patroni_python_packages:
   - psycopg2-binary

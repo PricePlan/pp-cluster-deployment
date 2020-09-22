@@ -63,7 +63,8 @@
       name: '{{ redis_container_name }}-sentinel'
       state: stopped
     register: redis_sentinel_stop
-    failed_when: '"image is not specified" not in redis_sentinel_stop.msg'
+    failed_when: false
+    #'"image is not specified" not in redis_sentinel_stop.msg'
     tags:
       - redis_sentinel
 

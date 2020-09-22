@@ -58,7 +58,7 @@
       src: '{{ nginx_config_dir }}/sites-available/{{ pp_http_hostname }}'
       dest: '{{ nginx_config_dir }}/sites-enabled/{{ pp_http_hostname }}'
       state: link
-    when: vhost_config.changed or force
+    when: vhost_config.changed
     notify: reload nginx_docker
     tags:
       - settings

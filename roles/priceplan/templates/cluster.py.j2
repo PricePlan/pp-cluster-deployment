@@ -29,7 +29,7 @@ CACHES = {
     'default': {
         'BACKEND': 'redis_cache.RedisCache',
         'LOCATION': [
-            '127.0.0.1:6379'
+            '127.0.0.1:{{ haproxy_frontend_redis_port }}'
         ],
         'OPTIONS': {
             'DB': REDIS_DBS['django_cache'],
@@ -45,11 +45,14 @@ CACHES = {
     }
 }
 
-CELERY_BROKER_URL = 'pyamqp://{{ amqp_user }}:{{ amqp_password }}' \
-    '@127.0.0.1:5672/{{ rabbitmq_default_vhost }}'
+CELERY_BROKER_URL = [
+    {% for host, ip in cluster.items() -%}
+    'pyamqp://{{ amqp_user }}:{{ amqp_password }}@{{ ip }}:{{ rabbitmq_port }}/{{ rabbitmq_default_vhost }}',
+    {% endfor -%}
+]
 
 CELERY_RESULT_BACKEND = 'redis://{redis_host}:{redis_port}/{db}'.format(
-    redis_host='127.0.0.1', redis_port=6379,
+    redis_host='127.0.0.1', redis_port={{ haproxy_frontend_redis_port }},
     db=REDIS_DBS['celery_result'])
 
 ELASTICSEARCH_CONNECTIONS = [

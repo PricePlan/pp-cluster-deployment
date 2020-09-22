@@ -112,5 +112,5 @@
     - role: assist/webfront-priceplan
       when: '"webfront" in group_names'
       tags:
-      - backend
+      - pp
       - webfront

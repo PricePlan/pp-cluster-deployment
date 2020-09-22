@@ -1,6 +1,14 @@
 pp_image_name: 'registry.priceplan.pro/priceplan/priceplan:{{ pp_image_version }}'
 
 pp_uwsgi_container_name: pp_uwsgi
+pp_common_container_name: pp_common
+pp_billing_container_name: pp_billing
+pp_ordinal_container_name: pp_ordinal
+pp_mail_container_name: pp_mail
+pp_http_container_name: pp_http
+pp_search_container_name: pp_search
+pp_cron_container_name: pp_cron
+pp_flower_container_name: pp_flower
 
 pp_network_mode: host
 pp_log_driver: json-file

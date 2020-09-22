@@ -12,3 +12,8 @@ host    replication     {{ patroni_replication_username }}      127.0.0.1/32    
 {% for host, ip in cluster.items() %}
 host    replication     {{ patroni_replication_username }}      {{ ip }}/32           md5
 {% endfor %}
+
+host    {{ pp_postgres_db }}     {{ pp_postgres_user }}      127.0.0.1/32            md5
+{% for host, ip in cluster.items() %}
+host    {{ pp_postgres_db }}    {{ pp_postgres_user }}      {{ ip }}/32           md5
+{% endfor %}

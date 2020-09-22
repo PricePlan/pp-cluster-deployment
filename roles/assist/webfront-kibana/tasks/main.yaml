@@ -2,7 +2,7 @@
 - block:
   - name: ensure nginx vhost config is up to date
     template:
-      src: 'vhost-kibana.priceplan.pro.j2'
+      src: 'vhost-kibana.priceplan.j2'
       dest: '{{ nginx_config_dir }}/sites-available/{{ kibana_vhost }}'
       owner: root
       group: '{{ nginx_gid }}'

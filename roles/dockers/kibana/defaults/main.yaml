@@ -33,10 +33,6 @@ nonhost_kibana_links:
 kibana_links: '{% if kibana_network_mode == "host" %}[]
   {% else %}{{ nonhost_kibana_links }}{% endif %}'
 
-kibana_vhost: 'kibana.{{ priceplan_http_hostname }}'
-# For nginx container mounted only nginx.conf in /etc/nginx
-kibana_htpasswd: '{{ nginx_config_dir }}/ssl/kibana.htpasswd'
-
 kibana_config_dir: /etc/kibana
 
 kibana_volumes:

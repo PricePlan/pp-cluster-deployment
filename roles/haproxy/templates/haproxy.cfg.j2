@@ -65,6 +65,13 @@ frontend pg
 #    use_backend static          if url_static
 #    default_backend             app
 
+#---------------------------------------------------------------------
+# frontend for Redis
+#---------------------------------------------------------------------
+frontend redis_front
+  mode tcp
+  bind *:{{ haproxy_frontend_redis_port }}
+  use_backend redis
 
 #---------------------------------------------------------------------
 # backend for PgBouncer with check Patroni status
@@ -79,9 +86,29 @@ backend postgres
   default-server inter 3s fall 3 rise 2
 
 {% for host, ip in cluster.items() %}
-  server {{ host }} {{ ip }}:{{ pgbouncer_listen_port }} maxconn 500 check port 8008
+  server {{ host }} {{ ip }}:{{ postgres_port }} maxconn 500 check port 8008
 {% endfor %}
 
+#---------------------------------------------------------------------
+# backend for Redis
+#---------------------------------------------------------------------
+backend redis
+  mode tcp
+  timeout connect 3s
+  timeout check 5s
+
+  option tcp-check
+  tcp-check connect
+  tcp-check send PING\r\n
+  tcp-check expect string +PONG
+  tcp-check send info\ replication\r\n
+  tcp-check expect string role:master
+  tcp-check send QUIT\r\n
+  tcp-check expect string +OK
+
+  {% for host, ip in cluster.items() %}
+  server {{ host }} {{ ip }}:{{ redis_port }} check inter 3s
+  {% endfor %}
 
 #---------------------------------------------------------------------
 # static backend for serving up images, stylesheets and such

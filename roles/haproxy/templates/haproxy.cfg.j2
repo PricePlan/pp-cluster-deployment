@@ -12,7 +12,7 @@ global
   log         /dev/log local0 info
   chroot      {{ haproxy_chroot_dir }}
   pidfile     /var/run/haproxy.pid
-  maxconn     400
+  maxconn     4096
   user        haproxy
   group       haproxy
   daemon
@@ -44,26 +44,15 @@ defaults
   timeout server          1m
   timeout http-keep-alive 10s
   timeout check           {{ haproxy_timeout_check }}s
-  maxconn                 500
+  maxconn                 512
 
 #---------------------------------------------------------------------
 # frontend for PostgreSQL (via PgBouncer)
 #---------------------------------------------------------------------
-frontend pg
+frontend postgres_front
   mode tcp
   bind *:{{ haproxy_frontend_pg_port }}
-  use_backend postgres
-
-#---------------------------------------------------------------------
-# main frontend which proxys to the backends
-#---------------------------------------------------------------------
-# frontend main
-#    bind *:5000
-#    acl url_static       path_beg       -i /static /images /javascript /stylesheets
-#    acl url_static       path_end       -i .jpg .gif .png .css .js
-#
-#    use_backend static          if url_static
-#    default_backend             app
+  use_backend postgres_back
 
 #---------------------------------------------------------------------
 # frontend for Redis
@@ -71,12 +60,12 @@ frontend pg
 frontend redis_front
   mode tcp
   bind *:{{ haproxy_frontend_redis_port }}
-  use_backend redis
+  use_backend redis_back
 
 #---------------------------------------------------------------------
 # backend for PgBouncer with check Patroni status
 #---------------------------------------------------------------------
-backend postgres
+backend postgres_back
   timeout connect 4s
   timeout check 5s
 
@@ -86,16 +75,16 @@ backend postgres
   default-server inter 3s fall 3 rise 2
 
 {% for host, ip in cluster.items() %}
-  server {{ host }} {{ ip }}:{{ postgres_port }} maxconn 500 check port 8008
+  server {{ host }} {{ ip }}:{{ postgres_port }} maxconn 512 check port 8008
 {% endfor %}
 
 #---------------------------------------------------------------------
 # backend for Redis
 #---------------------------------------------------------------------
-backend redis
+backend redis_back
   mode tcp
-  timeout connect 3s
-  timeout check 5s
+  # timeout connect 3s
+  # timeout check 5s
 
   option tcp-check
   tcp-check connect
@@ -106,24 +95,10 @@ backend redis
   tcp-check send QUIT\r\n
   tcp-check expect string +OK
 
+  # default-server inter 3s fall 3 rise 2
+
   {% for host, ip in cluster.items() %}
-  server {{ host }} {{ ip }}:{{ redis_port }} check inter 3s
+  server {{ host }} {{ ip }}:{{ redis_port }} maxconn 2048 check inter 3s
   {% endfor %}
 
-#---------------------------------------------------------------------
-# static backend for serving up images, stylesheets and such
-#---------------------------------------------------------------------
-# backend static
-#    balance     roundrobin
-#    server      static 127.0.0.1:4331 check
-
-
-#---------------------------------------------------------------------
-# round robin balancing between the various backends
-#---------------------------------------------------------------------
-# backend app
-#    balance     roundrobin
-#    server  app1 127.0.0.1:5001 check
-#    server  app2 127.0.0.1:5002 check
-#    server  app3 127.0.0.1:5003 check
-#    server  app4 127.0.0.1:5004 check
+  # check inter 3s

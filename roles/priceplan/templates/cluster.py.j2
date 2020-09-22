@@ -63,3 +63,66 @@ ELASTICSEARCH_CONNECTIONS = [
     {% endif -%}
     {% endfor -%}
 ]
+
+{#
+LOGGING['loggers']['application']['handlers'] = ['console', 'logstash_sys']
+LOGGING['loggers']['celery']['handlers'] = ['console', 'logstash_sys']
+LOGGING['loggers']['client_cabinet']['handlers'] = ['logstash_sys', ]
+LOGGING['loggers']['price_plan']['handlers'] = ['console', 'logstash_sys']
+
+LOGGING['loggers']['USER']['handlers'] = ['logstash_usr', 'console']
+
+LOGGING['loggers']['sab'] = {
+    'level': 'DEBUG',
+    'handlers': ['console', 'logstash_sys'],
+    'propagate': False,
+}
+
+LOGGING['loggers']['esearch'] = {
+    'level': 'DEBUG',
+    'handlers': ['console', 'logstash_sys'],
+    'propagate': False,
+}
+
+LOGGING['loggers']['pplog'] = {
+    'level': 'INFO',
+    'handlers': ['console', 'logstash_sys'],
+    'propagate': False,
+}
+
+LOGGING['loggers']['all_billing'] = {
+    'level': 'DEBUG',
+    'handlers': ['logstash_usr', 'console'],
+    'propagate': False,
+}
+
+LOGGING['loggers']['elasticsearch'] = {
+    'level': 'WARNING',
+    'handlers': ['logstash_sys', 'console'],
+    'propagate': False,
+}
+
+LOGGING['loggers']['AUDIT'] = {
+    'level': 'DEBUG',
+    'handlers': ['logstash_usr', 'console'],
+    'propagate': False,
+}
+
+LOGGING['loggers']['pp_modules'] = {
+    'level': 'DEBUG',
+    'handlers': ['console', 'logstash_sys'],
+    'propagate': False,
+}
+
+LOGGING['loggers']['priceplan'] = {
+    'level': 'DEBUG',
+    'handlers': ['console', 'logstash_sys'],
+    'propagate': False,
+}
+
+LOGGING['loggers']['snitch'] = {
+    'level': 'DEBUG',
+    'handlers': ['console', 'logstash_sys'],
+    'propagate': False,
+}
+#}

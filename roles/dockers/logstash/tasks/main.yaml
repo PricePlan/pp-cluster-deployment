@@ -1,6 +1,26 @@
 # Tasks of 'dockers/logstash' role
 ---
 - block:
+  - name: ensure Logstash config directory exists
+    file:
+      path: '{{ logstash_config_dir }}'
+      state: directory
+      owner: root
+      group: '{{ logstash_gid }}'
+      mode: '0755'
+    tags:
+      - logstash_conf
+
+  - name: ensure logstash.yml is up to date
+    template:
+      src: logstash.yml.j2
+      dest: '{{ logstash_config_dir }}/logstash.yml'
+      owner: '{{ logstash_uid }}'
+      group: '{{ logstash_gid }}'
+      mode: '0644'
+    tags:
+      - logstash_conf
+
   - name: ensure pipeline directory exists
     file:
       path: '{{ logstash_pipeline_dir }}'

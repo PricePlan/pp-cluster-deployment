@@ -34,7 +34,6 @@ redis_volumes:
 
 redis_command: 'redis-server {{ redis_config_dir }}/redis.conf'
 redis_sysctls: {}
-#  'vm.overcommit_memory': '1'
 redis_environment: {}
 
 redis_uid: '999'

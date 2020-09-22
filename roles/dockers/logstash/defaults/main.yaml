@@ -38,6 +38,7 @@ logstash_config_dir: /etc/logstash
 logstash_pipeline_dir: '{{ logstash_config_dir }}/pipeline'
 
 logstash_volumes:
+  - '{{ logstash_config_dir }}/logstash.yml:/usr/share/logstash/config/logstash.yml:ro'
   - '{{ logstash_pipeline_dir }}:/usr/share/logstash/pipeline:ro'
 
 logstash_uid: '1000'

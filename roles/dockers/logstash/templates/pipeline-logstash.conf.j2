@@ -29,7 +29,11 @@ output {
     {% if logstash_network_mode == "host" %}
     hosts => {{ elasticsearch_hosts | from_yaml }}
     {% else %}
-      hosts => [ {{ elasticsearch_container_name }}:{{ elasticsearch_port }} ]
+    hosts => [
+      {% for host, ip in cluster.items() %}
+      'http://{{ ip }}:{{ elasticsearch_port }}'{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ]
     {% endif %}
     {# user => "{{ logstash_elastic_user }}" #}
     {# password => "{{ logstash_elastic_password }}" #}

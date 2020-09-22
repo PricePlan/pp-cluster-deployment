@@ -59,15 +59,15 @@
       tags:
       - pgbouncer
 
-    - role: haproxy
-      when: '"postgres_cluster" in group_names'
-      tags:
-      - haproxy
-
     - role: 'dockers/redis'
       when: '"redis_cluster" in group_names'
       tags:
       - redis
+
+    - role: haproxy
+      when: '"postgres_cluster" in group_names'
+      tags:
+      - haproxy
 
     - role: 'dockers/rabbitmq'
       when: '"rabbitmq_cluster" in group_names'

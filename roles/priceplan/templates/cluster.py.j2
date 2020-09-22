@@ -55,6 +55,20 @@ CELERY_RESULT_BACKEND = 'redis://{redis_host}:{redis_port}/{db}'.format(
     redis_host='127.0.0.1', redis_port={{ haproxy_frontend_redis_port }},
     db=REDIS_DBS['celery_result'])
 
+# CELERY_RESULT_BACKEND = 'redis://{redis_host}:{redis_port}/{db}'.format(
+#    redis_host='127.0.0.1', redis_port={{ redis_port }},
+#    db=REDIS_DBS['celery_result'])
+
+{# CELERY_RESULT_BACKEND = [
+    {% for host, ip in cluster.items() -%}
+    'redis://{{ ip }}:{{ redis_port }}/{db}'.format(db=REDIS_DBS['celery_result']),
+    {% endfor -%}
+]
+#}
+CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = {
+    'master_name': '{{ redis_master }}'
+}
+
 ELASTICSEARCH_CONNECTIONS = [
     'http://127.0.0.1:9200',
     {% for host, ip in cluster.items() -%}

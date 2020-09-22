@@ -24,6 +24,21 @@ global
   ssl-default-bind-ciphers PROFILE=SYSTEM
   ssl-default-server-ciphers PROFILE=SYSTEM
 
+
+frontend http
+  bind :8080
+  default_backend stats
+
+backend stats
+  mode http
+  stats enable
+
+  stats enable
+  stats uri /
+  stats refresh 1s
+  stats show-legends
+  stats admin if TRUE
+
 #---------------------------------------------------------------------
 # common defaults that all the 'listen' and 'backend' sections will
 # use if not designated in their block
@@ -83,22 +98,28 @@ backend postgres_back
 #---------------------------------------------------------------------
 backend redis_back
   mode tcp
+  balance first
+
   # timeout connect 3s
   # timeout check 5s
 
   option tcp-check
-  tcp-check connect
+
+  tcp-check send info\ replication\r\n
+	tcp-check expect string role:master
+
+  {# tcp-check connect
   tcp-check send PING\r\n
   tcp-check expect string +PONG
   tcp-check send info\ replication\r\n
   tcp-check expect string role:master
   tcp-check send QUIT\r\n
-  tcp-check expect string +OK
+  tcp-check expect string +OK #}
 
   # default-server inter 3s fall 3 rise 2
 
   {% for host, ip in cluster.items() %}
-  server {{ host }} {{ ip }}:{{ redis_port }} maxconn 2048 check inter 3s
+  server {{ host }} {{ ip }}:{{ redis_port }} maxconn 512 check inter 1s
   {% endfor %}
 
   # check inter 3s

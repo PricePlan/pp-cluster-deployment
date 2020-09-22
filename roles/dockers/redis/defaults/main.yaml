@@ -57,5 +57,5 @@ redis_sentinel_command: 'redis-sentinel {{ redis_config_dir }}/sentinel.conf'
 
 redis_sentinel_bind: 0.0.0.0
 redis_sentinel_port: 26379
-redis_sentinel_master_down_timeout: 15000
-redis_sentinel_failover_timeout: 30000
+redis_sentinel_master_down_timeout: 2000
+redis_sentinel_failover_timeout: 5000

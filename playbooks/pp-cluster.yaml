@@ -10,54 +10,63 @@
     - role: transparent_huge_pages
       tags:
       - disable_thp
+      - base
 
     - role: timezone
       tags:
       - timezone
+      - base
 
     - role: locales
       tags:
       - locales
+      - base
 
     - role: ntp
       tags:
       - ntp
+      - base
 
     - role: docker
       when: '"pp_cluster" in group_names'
       tags:
       - docker
+      - base
 
     - role: 'dockers/etcd'
       when: '"etcd_cluster" in group_names'
       tags:
       - etcd
-      - etcd_conf
+      - pg
 
     - role: postgresql
       when: '"postgres_cluster" in group_names'
       tags:
       - postgres
+      - pg
 
     - role: patroni
       when: '"postgres_cluster" in group_names'
       tags:
       - patroni
+      - pg
 
     - role: postgresql-users
       when: '"master" in group_names and postgres_users | length > 0'
       tags:
       - postgres_users
+      - pg
 
     - role: postgresql-databases
       when: '"master" in group_names and postgres_users | length > 0'
       tags:
       - postgres_dbs
+      - pg
 
-    - role: pgbouncer
-      when: '"postgres_cluster" in group_names'
-      tags:
-      - pgbouncer
+    # - role: pgbouncer
+    #   when: '"postgres_cluster" in group_names'
+    #   tags:
+    #   - pgbouncer
 
     - role: 'dockers/redis'
       when: '"redis_cluster" in group_names'
@@ -74,6 +83,12 @@
       tags:
       - rabbitmq
 
+    - role: 'dockers/nginx'
+      when: '"nginx" in group_names'
+      tags:
+      - nginx-server
+      - elk
+
     - role: 'dockers/elasticsearch'
       when: '"elasticsearch_cluster" in group_names'
       tags:
@@ -85,11 +100,6 @@
       tags:
       - logstash
       - elk
-
-    - role: 'dockers/nginx'
-      when: '"nginx" in group_names'
-      tags:
-      - nginx-server
 
     - role: 'dockers/kibana'
       when: '"kibana" in group_names'

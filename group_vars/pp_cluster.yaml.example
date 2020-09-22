@@ -72,19 +72,81 @@ pgbouncer_listen_port: 6432
 
 # HAProxy
 haproxy_frontend_pg_port: 7432
+haproxy_frontend_redis_port: 7379
+
+# Redis
+redis_sentinel_password: 'VeryLongPasswordAsReidisIsFast' # Change it!
+redis_replica_password: 'VeryLongPasswordAsReidisIsFast'  # Change it!
+redis_master: pp-master
+redis_master_index: 1
+redis_hosts: '{{ cluster.keys() | list }}'
+redis_master_host: '{{ redis_hosts[redis_master_index] }}'
+redis_master_ip: '{{ cluster[redis_master_host] }}'
+
+# RabbitMQ
+rabbitmq_etc_hosts: '{{ cluster }}'
+
+amqp_user: priceplan
+amqp_password: 'priceplan_amqp_passwd' # Change it!
+
+rabbitmq_default_vhost: priceplan
+rabbitmq_cluster_name: pp_mq
+rabbit_auth_cookie: 'ThisIsAnErlangCookieInRealy' # Change it!
+rabbitmq_hosts: '{{ cluster.keys() | list }}'
 
 # Elasticsearch
 elk_version: 7.9.1
 elasticsearch_in_cluster: true
-cluster_name: pp-elk-cluster
-
-initial_master_nodes: '[{% for host, ip in cluster.items() %}"{{ host }}"{% if not loop.last %},{% endif %}{% endfor %}]'
+elasticsearch_cluster_name: pp-elk-cluster
+elasticsearch_etc_hosts: '{{ cluster }}'
 elasticsearch_hosts: '[{% for host, ip in cluster.items() %}"http://{{ ip }}"{% if not loop.last %},{% endif %}{% endfor %}]'
+initial_master_nodes: '[{% for host, ip in cluster.items() %}"{{ host }}"{% if not loop.last %},{% endif %}{% endfor %}]'
+
+# Logstash
+logstash_etc_hosts: '{{ cluster }}'
+
+# Kibana
+kibana_users: # Change it!
+  - username: kadmin
+    password: kadmin_password
+
+# nginx
+dns_servers:
+  - 77.88.8.8
+  - 8.8.8.8
 
 # Webfront
-priceplan_http_hostname: pp.biz
+web_domain_name: pp.biz
+pp_http_hostname: 'billing.{{ web_domain_name }}'
 
 # PricePlan
 pp_postgres_db: priceplan
 pp_postgres_user: priceplan
-pp_postgres_password: 'priZe4plan' # Change it!
+pp_postgres_password: 'PP_DB_Secret' # Change it!
+
+postgres_users:
+  - name: '{{ pp_postgres_user }}'
+    password: '{{ pp_postgres_password }}'
+    privs: 'CREATEDB,LOGIN'
+
+postgres_databases:
+  - db: '{{ pp_postgres_db }}'
+    owner: '{{ pp_postgres_user }}'
+    lc_collate: 'ru_RU.UTF-8'
+    lc_ctype: 'ru_RU.UTF-8'
+
+registry_user: test  # Change it!
+registry_password: 'Qehe91ymcCF6' # Change it!
+pp_image_version: 1.12.111
+
+# Run to generate:
+# $ echo $(base64 /dev/urandom | head -c50)
+pp_secret_key: 'qGropa6rNBTppqCCrrGpdrs5+M7Xwkighz54cmv5/yyHj+yt0D' # Change it!
+
+# misc
+disable_thp: true
+deep: false
+sites_home: /opt/sites
+static_home: '{{ sites_home }}/static'
+
+settings_module_name: dataspace

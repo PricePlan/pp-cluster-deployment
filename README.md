@@ -1,68 +1,22 @@
-# pp-cluster-deployment
+### pp-cluster-deployment
+---
 
-Развёртывание кластера PricePlan
+# Руководство по развёртыванию HA кластера PricePlan
 
-## Очень краткое руководство
+Для содания отказоустойчивого кластера АСР PricePlan, необходимо, как
+минимум, 3 ноды со следующими характерисками:
 
-1. Склонировать проект:
+- CPU не менее 4-х ядер;
+- RAM 32 GB;
+- HDD 120 GB;
+- OS CentOS 8.
 
-```
-$ git clone https://github.com/linskiy/pp-cluster-deployment.git
-```
+**Никаких пакетных фильтров!**
 
-2. Перейти в директорию проекта:
+Поскольку процесс развёртывания следует проводить в полуавтоматизированном
+режиме посредством playbook'а Ansible, мы условно разделим его на следующие
+этапы:
 
-```
-$ cd pp-cluster-deployment/
-```
-
-3. Создать виртуальное окружение Python:
-
-```
-$ python3 -m venv pve
-```
-
-4. Активировать его:
-
-```
-$ . pve/bin/activate
-```
-
-5. Установить Ansible
-
-```
-$ pip install ansible
-```
-
-6. Положить ключ в директорию keys
-
-7. Скопировать hosts.example в hosts
-
-```
-$ cp hosts.example hosts
-```
-
-8. Отредактировать hosts
-
-9. Скопировать group_vars/pp_cluster.yaml.example в group_vars/pp_cluster.yaml
-
-```
-$ cp group_vars/pp_cluster.yaml.example group_vars/pp_cluster.yaml
-```
-
-10. Отредактировать group_vars/pp_cluster.yaml
-
-11. Можно начинать запускать плэйбуки:
-
-* Для яндекса это сначала bootstrap_u.yaml
-
-```
-$ ansible-playbook playbooks/bootstrap_u.yaml
-```
-
-* И в завершение:
-
-```
-$ time ansible-playbook playbooks/pp-cluster.yaml
-```
-
+* [Клонирование проекта и создание окружения](docs/pve.md)
+* [Подготовка к запуску основного playbook'а](docs/preparing.md)
+* [Запуск основного playbook'а](docs/playbook_run.md)

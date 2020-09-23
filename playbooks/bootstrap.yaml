@@ -39,7 +39,26 @@
           - '{{ deploy_group}}'
           - docker
         shell: /bin/bash
-      when: deploy_password is not defined
+      when: deploy_password is undefined
       tags: deploy_user
 
-  become: yes
+    become: yes
+
+  - block:
+    - name: check authorized key file
+      local_action:
+        ansible.builtin.stat path='{{ ansible_ssh_private_key_file }}.pub'
+      become: no
+      register: optional_key
+
+    - name: set authorized key if file exists
+      authorized_key:
+        user: '{{ deploy_user }}'
+        state: present
+        key: "{{ lookup('file', '%s.pub' % ansible_ssh_private_key_file) }}"
+      when: optional_key.stat.exists
+
+    become: yes
+    when: ansible_ssh_private_key_file is defined
+    tags:
+      - key

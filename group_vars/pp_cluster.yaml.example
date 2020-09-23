@@ -1,10 +1,10 @@
-# Variables of 'pp_cluster' group
+### Variables of 'pp_cluster' group
 ---
-# Bootstrap
+### Bootstrap
 # ansible_user: root
 # ansible_ssh_pass: 'ChangeThisRightNow' # Change it!
 
-# Common
+### Common
 ansible_python_interpreter: /usr/bin/python3
 
 deploy_user: locksmith
@@ -22,13 +22,10 @@ cluster:
   pp2: 10.1.1.2
   pp3: 10.1.1.3
 
-timezone: 'Europe/Moscow'
-docker_pull: true
-
-# Etcd
+### Etcd
 etcd_cluster_name: pp-etcd-cluster
 
-# PostgreSQL
+### PostgreSQL
 postgres_version: '12'
 
 postgres_package_profiles:
@@ -46,7 +43,7 @@ postgres_conf_dir: '{{ postgres_data_dir }}'
 postgres_bin_dir: /usr/bin
 postgres_unix_socket_dir: /var/run/postgresql
 
-# Patroni
+### Patroni
 pves_home: /opt/pves
 postgres_cluster_name: pp-pgcluster
 
@@ -67,14 +64,14 @@ patroni_postgres_use_pg_rewind: true
 
 etcd_hosts_ports: '[{% for host, ip in cluster.items() %}"{{ ip }}:2379"{% if not loop.last %},{% endif %}{% endfor %}]'
 
-# PgBouncer
+### PgBouncer
 pgbouncer_listen_port: 6432
 
-# HAProxy
+### HAProxy
 haproxy_frontend_pg_port: 7432
 haproxy_frontend_redis_port: 7379
 
-# Redis
+### Redis
 redis_sentinel_password: 'VeryLongPasswordAsReidisIsFast' # Change it!
 redis_replica_password: 'VeryLongPasswordAsReidisIsFast'  # Change it!
 redis_master: pp-master
@@ -83,7 +80,7 @@ redis_hosts: '{{ cluster.keys() | list }}'
 redis_master_host: '{{ redis_hosts[redis_master_index] }}'
 redis_master_ip: '{{ cluster[redis_master_host] }}'
 
-# RabbitMQ
+### RabbitMQ
 rabbitmq_etc_hosts: '{{ cluster }}'
 
 amqp_user: priceplan
@@ -94,7 +91,12 @@ rabbitmq_cluster_name: pp_mq
 rabbit_auth_cookie: 'ThisIsAnErlangCookieInRealy' # Change it!
 rabbitmq_hosts: '{{ cluster.keys() | list }}'
 
-# Elasticsearch
+### Nginx
+dns_servers:
+  - 77.88.8.8
+  - 8.8.8.8
+
+### Elasticsearch
 elk_version: 7.9.1
 elasticsearch_in_cluster: true
 elasticsearch_cluster_name: pp-elk-cluster
@@ -102,24 +104,19 @@ elasticsearch_etc_hosts: '{{ cluster }}'
 elasticsearch_hosts: '[{% for host, ip in cluster.items() %}"http://{{ ip }}"{% if not loop.last %},{% endif %}{% endfor %}]'
 initial_master_nodes: '[{% for host, ip in cluster.items() %}"{{ host }}"{% if not loop.last %},{% endif %}{% endfor %}]'
 
-# Logstash
+### Logstash
 logstash_etc_hosts: '{{ cluster }}'
 
-# Kibana
+### Kibana
 kibana_users: # Change it!
   - username: kadmin
     password: kadmin_password
 
-# nginx
-dns_servers:
-  - 77.88.8.8
-  - 8.8.8.8
-
-# Webfront
-web_domain_name: pp.biz
+### Webfront
+web_domain_name: tl.dr # Change it!
 pp_http_hostname: 'billing.{{ web_domain_name }}'
 
-# PricePlan
+### PricePlan
 pp_postgres_db: priceplan
 pp_postgres_user: priceplan
 pp_postgres_password: 'PP_DB_Secret' # Change it!
@@ -143,8 +140,10 @@ pp_image_version: 1.12.111
 # $ echo $(base64 /dev/urandom | head -c50)
 pp_secret_key: 'qGropa6rNBTppqCCrrGpdrs5+M7Xwkighz54cmv5/yyHj+yt0D' # Change it!
 
-# misc
+### misc
+timezone: 'Europe/Moscow'
 disable_thp: true
+docker_pull: true
 deep: false
 sites_home: /opt/sites
 static_home: '{{ sites_home }}/static'

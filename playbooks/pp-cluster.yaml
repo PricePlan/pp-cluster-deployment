@@ -3,7 +3,7 @@
 - name: Deploy PricePlan on cluster
   hosts:
     - pp_cluster
-    - load_balancer
+    - load_balancers
   # strategy: debug
   gather_facts: yes
 

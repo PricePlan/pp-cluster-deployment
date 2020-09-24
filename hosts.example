@@ -1,5 +1,5 @@
 # Inventory example
-[load_balancer]
+[load_balancers]
 lb1 ansible_host=100.200.25.1
 lb2 ansible_host=100.200.25.2
 

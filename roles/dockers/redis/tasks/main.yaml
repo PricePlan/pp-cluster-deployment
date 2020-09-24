@@ -62,9 +62,9 @@
     docker_container:
       name: '{{ redis_container_name }}-sentinel'
       state: stopped
+      container_default_behavior: '{{ redis_default_behavior }}'
     register: redis_sentinel_stop
     failed_when: false
-    #'"image is not specified" not in redis_sentinel_stop.msg'
     tags:
       - redis_sentinel
 
@@ -84,22 +84,14 @@
       restart_policy: always
       sysctls: '{{ redis_sysctls | from_yaml }}'
       command: '{{ redis_command }}'
+      container_default_behavior: '{{ redis_default_behavior }}'
     register: redis_docker_installed
 
-  - name: check Redis is accepting connections
-    command: '/usr/sbin/ss -lnf inet'
-    register: redis_is_ready
-    until: redis_is_ready.stdout and redis_bind in redis_is_ready.stdout
-    retries: 15
-    delay: 5
-    changed_when: false
-    tags:
-      - redis_sentinel
-
-  - name: show us redis_is_ready
-    debug: var=redis_is_ready verbosity=2
-    tags:
-      - redis_sentinel
+  - name: wait until Redis stands up
+    wait_for:
+      host: '127.0.0.1'
+      port: '{{ redis_port }}'
+      delay: 2
 
   - name: ensure sentinel.conf is up to date
     template:
@@ -129,6 +121,7 @@
       restart_policy: always
       sysctls: '{{ redis_sysctls | from_yaml }}'
       command: '{{ redis_sentinel_command }}'
+      container_default_behavior: '{{ redis_default_behavior }}'
     register: sentinel_docker_installed
     tags:
       - redis_sentinel

@@ -6,7 +6,7 @@ rabbitmq_image_name:
   {% if rabbitmq_version %}:{{ rabbitmq_version }}{% endif %}\
   {% if rabbitmq_image_variant %}-{{ rabbitmq_image_variant }}{% endif %}"
 
-rabbitmq_ip: 127.0.0.1
+rabbitmq_ip: 0.0.0.0
 rabbitmq_port: '5672'
 
 rabbitmq_container_name: rabbitmq
@@ -19,11 +19,13 @@ rabbitmq_log_options:
   mode: non-blocking
   max-buffer-size: '4m'
 
-rabbitmq_exposed_ports:
-  - '{{ rabbitmq_port }}'
+nonhost_rabbitmq_published_ports:
+ - '{{ rabbitmq_ip }}:{{ rabbitmq_port }}:{{ rabbitmq_port }}'
 
-rabbitmq_published_ports: []
-#  - '{{ rabbitmq_ip }}:{{ rabbitmq_port }}:{{ rabbitmq_port }}'
+rabbitmq_published_ports: '{% if rabbitmq_network_mode == "host" %}[]
+  {% else %}{{ nonhost_rabbitmq_published_ports }}{% endif %}'
+
+rabbitmq_exposed_ports: []
 
 rabbitmq_dir: /var/lib/rabbitmq
 rabbitmq_config_dir: /etc/rabbitmq
@@ -51,3 +53,5 @@ rabbitmq_plugins:
   - rabbitmq_management
 
 rabbitmq_cluster_name: mq_cluster
+
+rabbitmq_default_behavior: '{{ docker_default_behavior | default("no_defaults") }}'

@@ -59,3 +59,5 @@ redis_sentinel_bind: 0.0.0.0
 redis_sentinel_port: 26379
 redis_sentinel_master_down_timeout: 2000
 redis_sentinel_failover_timeout: 5000
+
+redis_default_behavior: '{{ docker_default_behavior | default("no_defaults") }}'

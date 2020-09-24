@@ -61,27 +61,20 @@
     tags:
       - rabbitmq_container
 
-  - name: create a rabbitmq container
-    docker_container:
-      name: '{{ rabbitmq_container_name }}'
-      image: '{{ rabbitmq_image_name }}'
-      pull: '{{ docker_pull }}'
-      state: started
-      recreate: yes
-      exposed_ports: '{{ rabbitmq_exposed_ports }}'
-      published_ports: '{{ rabbitmq_published_ports }}'
-      env: '{{ rabbitmq_environment }}'
-      volumes: '{{ rabbitmq_volumes }}'
-
-      log_driver: '{{ rabbitmq_log_driver }}'
-      log_options: '{{ rabbitmq_log_options }}'
-
-      network_mode: '{{ rabbitmq_network_mode }}'
-      etc_hosts: '{{ rabbitmq_etc_hosts }}'
-
-      restart_policy: always
-    register: rabbitmq_docker_installed
-    tags:
-      - rabbitmq_container
-
   become: yes
+
+- name: start first RabbitMQ instance
+  vars:
+    target_set: '{{ rabbitmq_hosts[:1] | list }}'
+  include_tasks: start_set.yaml
+  when: ansible_hostname in target_set
+  tags:
+    - rabbitmq_container
+
+- name: start other instances
+  vars:
+    target_set: '{{ rabbitmq_hosts[1:] | list }}'
+  include_tasks: start_set.yaml
+  when: ansible_hostname in target_set
+  tags:
+    - rabbitmq_container

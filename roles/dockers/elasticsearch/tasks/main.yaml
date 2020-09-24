@@ -56,6 +56,7 @@
         - nofile:65536:65536
         - memlock:-1:-1
       restart_policy: always
+      container_default_behavior: '{{ elasticsearch_default_behavior }}'
     register: docker_elasticsearch_installed
 
   become: yes

@@ -24,8 +24,8 @@ logstash_log_options:
   mode: non-blocking
   max-buffer-size: 4m
 
-logstash_etc_hosts:
-  elasticsearch: 127.0.0.1
+logstash_etc_hosts: []
+#  elasticsearch: 127.0.0.1
 
 logstash_environment: {}
 
@@ -46,3 +46,5 @@ logstash_gid: '1000'
 
 logstash_elastic_user: logstash
 logstash_elastic_password: logstash_passwd
+
+logstash_default_behavior: '{{ docker_default_behavior | default("no_defaults") }}'

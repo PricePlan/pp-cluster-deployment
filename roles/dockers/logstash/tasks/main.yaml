@@ -61,6 +61,7 @@
       volumes: '{{ logstash_volumes }}'
       links: '{{ logstash_links }}'
       restart_policy: always
+      container_default_behavior: '{{ logstash_default_behavior }}'
     register: docker_logstash_installed
 
   become: yes

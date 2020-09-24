@@ -42,3 +42,5 @@ elasticsearch_volumes:
 
 elasticsearch_uid: '1000'
 elasticsearch_gid: '1000'
+
+elasticsearch_default_behavior: '{{ docker_default_behavior | default("no_defaults") }}'

@@ -56,3 +56,5 @@ nginx_environment: {}
 
 nginx_uid: '100'
 nginx_gid: '101'
+
+nginx_default_behavior: '{{ docker_default_behavior | default("no_defaults") }}'

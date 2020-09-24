@@ -1,15 +1,5 @@
 pp_image_name: 'registry.priceplan.pro/priceplan/priceplan:{{ pp_image_version }}'
 
-pp_uwsgi_container_name: pp_uwsgi
-pp_common_container_name: pp_common
-pp_billing_container_name: pp_billing
-pp_ordinal_container_name: pp_ordinal
-pp_mail_container_name: pp_mail
-pp_http_container_name: pp_http
-pp_search_container_name: pp_search
-pp_cron_container_name: pp_cron
-pp_flower_container_name: pp_flower
-
 pp_network_mode: host
 pp_log_driver: json-file
 pp_log_options:
@@ -24,11 +14,55 @@ pp_environment:
   SECRET_KEY: '{{ pp_secret_key }}'
   DJANGO_SETTINGS_MODULE: 'priceplan.settings.{{ settings_module_name }}'
   PRICEPLAN_LOGSTASH_HOST: 127.0.0.1
-  # PRICEPLAN_PG_DATABASE:
-  # PRICEPLAN_PG_USER:
-  # PRICEPLAN_PG_PASSWORD:
-  # PRICEPLAN_PG_HOST:
-  # PRICEPLAN_PG_PORT:
 
 pp_uid: '122'
 pp_gid: '998'
+
+pp_default_behavior: '{{ docker_default_behavior | default("no_defaults") }}'
+
+pp_layout:
+  uwsgi:
+    name: pp_uwsgi
+    desc: UWSGI worker
+    command:
+    - uwsgi
+  common:
+    name: pp_common
+    desc: worker for common tasks
+    command:
+    - common
+  billing:
+    name: pp_billing
+    desc: worker for billing tasks
+    command:
+    - billing
+  ordinal:
+    name: pp_ordinal
+    desc: worker for client level billing tasks
+    command:
+    - ordinal
+  mail:
+    name: pp_mail
+    desc: worker for send mail tasks
+    command:
+    - mail
+  http:
+    name: pp_http
+    desc: run worker for http hooks
+    command:
+    - http
+  search:
+    name: pp_search
+    desc: worker for search tasks
+    command:
+    - search
+  cron:
+    name: pp_cron
+    desc: cron worker
+    command:
+    - master
+  flower:
+    name: pp_flower
+    desc: flower
+    command:
+    - flower

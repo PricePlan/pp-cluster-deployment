@@ -42,6 +42,11 @@
       when: deploy_password is undefined
       tags: deploy_user
 
+    - name: upgrade all packages
+      dnf:
+        name: '*'
+        state: latest
+
     become: yes
 
   - block:

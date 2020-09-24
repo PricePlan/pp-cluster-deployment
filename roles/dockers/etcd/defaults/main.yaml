@@ -39,3 +39,5 @@ etcd_volumes:
 
 etcd_uid: '1001'
 etcd_gid: '0'
+
+etcd_default_behavior: '{{ docker_default_behavior | default("no_defaults") }}'

@@ -40,3 +40,5 @@ kibana_volumes:
 
 kibana_gid: '1000'
 kibana_uid: '1000'
+
+kibana_default_behavior: '{{ docker_default_behavior | default("no_defaults") }}'

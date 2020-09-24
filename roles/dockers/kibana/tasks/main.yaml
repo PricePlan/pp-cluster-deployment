@@ -40,5 +40,6 @@
       links: '{{ kibana_links }}'
       volumes: '{{ kibana_volumes | default([]) }}'
       restart_policy: always
+      container_default_behavior: '{{ kibana_default_behavior }}'
 
   become: yes

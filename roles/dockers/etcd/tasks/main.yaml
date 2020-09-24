@@ -67,6 +67,7 @@
     volumes: '{{ etcd_volumes }}'
 
     restart_policy: always
+    container_default_behavior: '{{ etcd_default_behavior }}'
   become: yes
   tags:
     - etcd_container

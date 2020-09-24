@@ -3,6 +3,7 @@
 - name: Deploy PricePlan on cluster
   hosts:
     - pp_cluster
+    - load_balancer
   # strategy: debug
   gather_facts: yes
 
@@ -74,9 +75,10 @@
       - redis
 
     - role: haproxy
-      when: '"postgres_cluster" in group_names'
+      when: '"pp_cluster" in group_names or "load_balancer" in group_names'
       tags:
       - haproxy
+
 
     - role: 'dockers/rabbitmq'
       when: '"rabbitmq_cluster" in group_names'

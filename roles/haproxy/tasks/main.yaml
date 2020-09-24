@@ -64,7 +64,7 @@
     tags:
       - haproxy_service
 
-  - name: ensure HAProxy config is up to date
+  - name: ensure HAProxy config is up to date (PG/Redis)
     template:
       src: haproxy.cfg.j2
       dest: /etc/haproxy/haproxy.cfg
@@ -72,6 +72,19 @@
       group: haproxy
       mode: 0640
     notify: 'restart haproxy'
+    when: '"pp_cluster" in group_names'
+    tags:
+      - haproxy_config
+
+  - name: ensure HAProxy config is up to date (LB)
+    template:
+      src: haproxy-lb.cfg.j2
+      dest: /etc/haproxy/haproxy.cfg
+      owner: haproxy
+      group: haproxy
+      mode: 0640
+    notify: 'restart haproxy'
+    when: '"load_balancer" in group_names'
     tags:
       - haproxy_config
 

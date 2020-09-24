@@ -1,0 +1,85 @@
+#---------------------------------------------------------------------
+# See the full configuration options online.
+#
+#   https://www.haproxy.org/download/1.8/doc/configuration.txt
+#
+#---------------------------------------------------------------------
+
+#---------------------------------------------------------------------
+# Global settings
+#---------------------------------------------------------------------
+global
+  log         /dev/log local0 info
+  chroot      {{ haproxy_chroot_dir }}
+  pidfile     /var/run/haproxy.pid
+  maxconn     1024
+  user        haproxy
+  group       haproxy
+  daemon
+
+  # turn on stats unix socket
+  stats socket /var/lib/haproxy/stats
+
+  # utilize system-wide crypto-policies
+  ssl-default-bind-ciphers PROFILE=SYSTEM
+  ssl-default-server-ciphers PROFILE=SYSTEM
+
+
+frontend http
+  bind :8080
+  default_backend stats
+
+backend stats
+  mode http
+  stats enable
+
+  stats enable
+  stats uri /
+  stats refresh 1s
+  stats show-legends
+  stats admin if TRUE
+
+#---------------------------------------------------------------------
+# common defaults that all the 'listen' and 'backend' sections will
+# use if not designated in their block
+#---------------------------------------------------------------------
+defaults
+  mode                    tcp
+  log                     global
+  # option                  httplog
+  option                  dontlognull
+  # option http-server-close
+  # option forwardfor       except 127.0.0.0/8
+  option                  redispatch
+  retries                 3
+  timeout http-request    10s
+  timeout queue           1m
+  timeout connect         10s
+  timeout client          1m
+  timeout server          1m
+  timeout http-keep-alive 10s
+  timeout check           {{ haproxy_timeout_check }}s
+  maxconn                 512
+
+#---------------------------------------------------------------------
+# frontend for HTTP proto
+#---------------------------------------------------------------------
+frontend pp_http_front
+  mode tcp
+  bind *:{{ nginx_http_port }}
+  use_backend pp_http_back
+
+#---------------------------------------------------------------------
+# backend for PricePlan HTTP
+#---------------------------------------------------------------------
+backend pp_http_back
+  mode tcp
+  balance roundrobin
+  timeout check 5s
+  option tcp-check
+  tcp-check connect port {{ nginx_http_port }}
+  default-server inter 3s fall 3 rise 2
+
+{% for host, ip in cluster.items() %}
+  server {{ host }} {{ ip }}:{{ nginx_http_port }} maxconn 1024 check
+{% endfor %}

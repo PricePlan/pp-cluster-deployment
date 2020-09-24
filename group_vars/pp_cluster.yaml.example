@@ -1,27 +1,5 @@
 ### Variables of 'pp_cluster' group
 ---
-### Bootstrap
-# ansible_user: root
-# ansible_ssh_pass: 'ChangeThisRightNow' # Change it!
-
-### Common
-ansible_python_interpreter: /usr/bin/python3
-
-deploy_user: locksmith
-deploy_group: wheel
-# deploy_password: 'ChangeThisSecretWord' # Change it! Do not use '-'!
-
-ansible_user: '{{ deploy_user }}'
-ansible_ssh_private_key_file: '{{ inventory_dir }}/keys/ansible_ecdsa'
-# ansible_ssh_pass: '{{ deploy_password }}'
-# ansible_become_pass: '{{ deploy_password }}'
-
-# Fill it with your values, please!
-cluster:
-  pp1: 10.1.1.1
-  pp2: 10.1.1.2
-  pp3: 10.1.1.3
-
 ### Etcd
 etcd_cluster_name: pp-etcd-cluster
 

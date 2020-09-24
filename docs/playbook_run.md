@@ -102,7 +102,13 @@ $ time ansible-playbook playbooks/pp-cluster.yaml -t haproxy
 ```
 
 Если зайти броузером зайти на любую ноду на порт 8080, можно будет увидеть
-т.н. Statistics Report. Для каждого бэкенда (postgres_back, rdis_back) должен просматриваться мастер в виде ряда таблицы зелёного цвета.
+т.н. Statistics Report. Для каждого бэкенда (postgres_back, redis_back) должен просматриваться мастер в виде ряда таблицы зелёного цвета.
+
+Эта команда установит HAProxy, как на нодах кластера для балансировки
+PostgreSQL и Redis, так и на выделенных балансировщиках для пропуска HTTP
+трафика web-интерфейса и REST API PricePlan. Область настройки работы
+приложения по протоколу HTTPS в виду недетерминированности требований находится
+за пределами повествования.
 
 Следующий по списку RabbitMQ. По правде говоря, такой сценарий можно было
 реализовтать в роли Ansible, но время поджимало. Поэтому для надёжности лучше
@@ -121,7 +127,7 @@ $ time ansible-playbook playbooks/pp-cluster.yaml -t rabbitmq -l pp2,pp3
 
 Для проверки на 1-ой (для которой первый раз запускали) ноде следует запустить просмотр лога RabbitMQ:
 
-```bash
+``bash
 $ docker logs -f rabbitmq
 ```
 
@@ -146,7 +152,7 @@ $ time ansible-playbook playbooks/pp-cluster.yaml -t rabbitmq -l nginx-server,el
 Последний шаг этапа — установка PricePlan. Выполните:
 
 ```bash
-$ time ansible-playbook playbooks/pp-cluster.yaml -t rabbitmq -l nginx-server,elk
+$ time ansible-playbook playbooks/pp-cluster.yaml -t rabbitmq -l pp
 ```
 
 Если в процессе проявится подобная ошибка:
@@ -159,3 +165,7 @@ fatal: [pp1]: FAILED! => {"changed": false, "msg": "Error creating container: Un
 
 Просто запустите команду ещё раз, это образ докера PricePlan не успел
 загрузиться. Вторая попытка должна увенчаться с успехом.
+
+После [создания схемы данных](db-schema.md) или переноса данных с другого сервера,
+web-интерфейс PricePlan будет доступен по адресу, определенному в переменной
+`pp_http_hostname` из файла *group_vars/pp_cluster.yaml*.

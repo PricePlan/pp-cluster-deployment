@@ -26,3 +26,4 @@ DMZ, рекомендуется организовать между ними VPN
 * [Подготовка к запуску основного playbook'а](docs/preparing.md)
 * [Запуск основного playbook'а](docs/playbook_run.md)
 * [Создание схемы данных](docs/db-schema.md)
+* [Импорт данных](docs/import-data.md)

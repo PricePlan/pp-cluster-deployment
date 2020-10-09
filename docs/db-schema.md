@@ -5,5 +5,5 @@
 
 ```bash
 $ docker exec -it pp_uwsgi /bin/sh
-/pp $ PRICEPLAN_ADMIN_PASSWORD="<your_admin_password>" ./manage.py create_schema main
+/pp $ PRICEPLAN_ADMIN_PASSWORD="<pp_postgres_password>" ./manage.py create_schema main
 ```

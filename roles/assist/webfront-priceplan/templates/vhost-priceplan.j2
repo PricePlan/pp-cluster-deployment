@@ -2,17 +2,17 @@ upstream uwsgi_pp {
   server 127.0.0.1:8001 fail_timeout=20s;
 }
 
-{% if 'production' in group_names -%}
+{% if web_protocol == 'https' -%}
 ### HTTPS #####################################################################
 # See https://mozilla.github.io/server-side-tls/ssl-config-generator/
 server {
   listen {{ nginx_https_port }} ssl http2;
   listen [::]:{{ nginx_https_port }} ssl http2;
 
-  server_name {{ pp_http_hostname }};
+  server_name {{ pp_http_hostname }} default_server;
 
-  ssl_certificate /etc/letsencrypt/live/{{ pp_http_hostname }}/fullchain.pem;
-  ssl_certificate_key /etc/letsencrypt/live/{{ pp_http_hostname }}/privkey.pem;
+  ssl_certificate {{ nginx_config_dir }}/ssl/priceplan.crt;
+  ssl_certificate_key {{ nginx_config_dir }}/ssl/priceplan.key;
 
   include snippets/ssl.conf;
 
@@ -25,7 +25,7 @@ server {
 # Redirect all traffic to HTTPS
 server {
   listen {{ nginx_http_port }};
-  server_name {{ pp_http_hostname }};
+  server_name {{ pp_http_hostname }} default_server;
   return 301 https://$host$request_uri;
 }
 {% else %}

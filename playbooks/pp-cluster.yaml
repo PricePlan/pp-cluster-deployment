@@ -75,7 +75,7 @@
       - redis
 
     - role: haproxy
-      when: '"pp_cluster" in group_names or "load_balancer" in group_names'
+      when: '"pp_cluster" in group_names or "load_balancers" in group_names'
       tags:
       - haproxy
 

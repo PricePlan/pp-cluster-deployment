@@ -62,24 +62,33 @@ defaults
   maxconn                 512
 
 #---------------------------------------------------------------------
-# frontend for HTTP proto
+# frontend for {{ web_protocol | upper }} proto
 #---------------------------------------------------------------------
-frontend pp_http_front
+frontend pp_{{ web_protocol }}_front
   mode tcp
+  {% if web_protocol == 'https' -%}
+  bind *:{{ nginx_https_port }}
+  {% else -%}
   bind *:{{ nginx_http_port }}
-  use_backend pp_http_back
+  {% endif -%}
+  use_backend pp_{{ web_protocol }}_back
 
 #---------------------------------------------------------------------
-# backend for PricePlan HTTP
+# backend for PricePlan {{ web_protocol | upper }}
 #---------------------------------------------------------------------
-backend pp_http_back
+backend pp_{{ web_protocol }}_back
   mode tcp
   balance roundrobin
   timeout check 5s
   option tcp-check
+  {% if web_protocol == 'https' -%}
+  tcp-check connect port {{ nginx_https_port }}
+  {% else -%}
   tcp-check connect port {{ nginx_http_port }}
+  {% endif -%}
   default-server inter 3s fall 3 rise 2
 
 {% for host, ip in cluster.items() %}
-  server {{ host }} {{ ip }}:{{ nginx_http_port }} maxconn 1024 check
+  server {{ host }} {{ ip }}:{% if web_protocol == 'https' -%}
+    {{ nginx_https_port }}{% else -%}{{ nginx_http_port }}{% endif %} maxconn 1024 check
 {% endfor %}

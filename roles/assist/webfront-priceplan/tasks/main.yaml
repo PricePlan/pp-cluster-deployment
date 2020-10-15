@@ -1,18 +1,18 @@
 # Tasks of 'assist/webfront-priceplan' role
 ---
 - block:
-  # - name: ensure vhost SSL certificates is up to date
-  #   copy: src='{{ inventory_dir }}/files/keys/{{ item }}'
-  #     dest='{{ nginx_config_dir }}/ssl/'
-  #     owner=root group=root mode=0644
-  #   with_items:
-  #     - priceplan.crt
-  #     - priceplan.key
-  #   register: vhost_certificates
-  #   notify: reload nginx_docker
-  #   tags:
-  #     - settings
-  #     - nginx
+  - name: ensure vhost SSL certificates is up to date
+    copy: src='{{ inventory_dir }}/files/ssl/{{ item }}'
+      dest='{{ nginx_config_dir }}/ssl/'
+      owner=root group=root mode=0644
+    loop:
+      - priceplan.crt
+      - priceplan.key
+    register: vhost_certificates
+    notify: reload nginx_docker
+    tags:
+      - settings
+      - nginx
 
   - name: ensure blacklist configuration file exists
     file:

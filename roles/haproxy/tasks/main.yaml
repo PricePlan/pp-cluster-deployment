@@ -84,7 +84,7 @@
       group: haproxy
       mode: 0640
     notify: 'restart haproxy'
-    when: '"load_balancer" in group_names'
+    when: '"load_balancers" in group_names'
     tags:
       - haproxy_config
 

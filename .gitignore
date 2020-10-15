@@ -3,6 +3,7 @@
 
 /pve
 
+files/ssl/*
 keys/*
 group_vars/*
 host_vars/*

@@ -28,3 +28,4 @@ DMZ, рекомендуется организовать между ними VPN
 * [Создание схемы данных](docs/db-schema.md)
 * [Импорт данных](docs/import-data.md)
 * [Переход на HTTPS](docs/https.md)
+* [Обновление PricePlan](docs/upgrade_pp.md)

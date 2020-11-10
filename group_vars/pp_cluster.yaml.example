@@ -110,9 +110,10 @@ postgres_databases:
     lc_collate: 'ru_RU.UTF-8'
     lc_ctype: 'ru_RU.UTF-8'
 
+docker_registry: hub.docker.com
 registry_user: docker_user  # Change it!
 registry_password: 'docker_password' # Change it!
-pp_image_version: 1.12.111
+pp_image_version: 1.14.4
 
 # Run to generate:
 # $ echo $(base64 /dev/urandom | head -c50)

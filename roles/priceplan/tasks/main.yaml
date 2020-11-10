@@ -11,7 +11,7 @@
 
 - name: log into PricePlan registry
   docker_login:
-    registry: registry.priceplan.pro
+    registry: '{{ docker_registry }}'
     username: '{{ registry_user }}'
     password: '{{ registry_password }}'
     # reauthorize: yes
@@ -27,5 +27,5 @@
 
 - name: Log out of PricePlan registry
   docker_login:
-    registry: registry.priceplan.pro
+    registry: '{{ docker_registry }}'
     state: absent

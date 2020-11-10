@@ -1,4 +1,4 @@
-pp_image_name: 'registry.priceplan.pro/priceplan/priceplan:{{ pp_image_version }}'
+pp_image_name: 'priceplan/priceplan:{{ pp_image_version }}'
 
 pp_network_mode: host
 pp_log_driver: json-file
@@ -22,10 +22,10 @@ pp_default_behavior: '{{ docker_default_behavior | default("no_defaults") }}'
 
 pp_layout:
   uwsgi:
-    name: pp_uwsgi
-    desc: UWSGI worker
+    name: pp_wsgi
+    desc: WSGI server
     command:
-    - uwsgi
+    - wsgi
   common:
     name: pp_common
     desc: worker for common tasks

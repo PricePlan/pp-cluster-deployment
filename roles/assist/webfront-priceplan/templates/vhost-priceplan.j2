@@ -1,5 +1,5 @@
-upstream uwsgi_pp {
-  server 127.0.0.1:8001 fail_timeout=20s;
+upstream wsgi_pp {
+  server 127.0.0.1:8001 fail_timeout=10s;
 }
 
 {% if web_protocol == 'https' -%}

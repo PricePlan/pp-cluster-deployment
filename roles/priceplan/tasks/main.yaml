@@ -15,6 +15,8 @@
     username: '{{ registry_user }}'
     password: '{{ registry_password }}'
     # reauthorize: yes
+  tags:
+    - registry_login
 
 - name: run bunch of PricePlan services...
   vars:
@@ -29,3 +31,5 @@
   docker_login:
     registry: '{{ docker_registry }}'
     state: absent
+  tags:
+    - registry_logout

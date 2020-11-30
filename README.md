@@ -29,3 +29,4 @@ DMZ, рекомендуется организовать между ними VPN
 * [Импорт данных](docs/import-data.md)
 * [Переход на HTTPS](docs/https.md)
 * [Обновление PricePlan](docs/upgrade_pp.md)
+* [Восстановление отдельной ноды кластера](docs/recover_node.md)

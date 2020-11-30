@@ -7,9 +7,8 @@
       name: '{{ etcd_container_name }}'
       container_default_behavior: '{{ etcd_default_behavior }}'
       state: stopped
-
     register: etcd_stopped
-    # failed_when: false
+    failed_when: false
     tags: etcd
 
   - name: drop {{ etcd_home }} directory

@@ -67,7 +67,7 @@
   vars:
     target_set: '{{ rabbitmq_hosts[:1] | list }}'
   include_tasks: start_set.yaml
-  when: ansible_hostname in target_set
+  when: ansible_hostname in target_set and not assume_replica | default(False)
   tags:
     - rabbitmq_container
 
@@ -75,6 +75,6 @@
   vars:
     target_set: '{{ rabbitmq_hosts[1:] | list }}'
   include_tasks: start_set.yaml
-  when: ansible_hostname in target_set
+  when: ansible_hostname in target_set or assume_replica | default(False)
   tags:
     - rabbitmq_container

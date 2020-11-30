@@ -84,7 +84,7 @@ backend postgres_back
   timeout connect 4s
   timeout check 5s
 
-  option httpchk
+  option httpchk /leader
   http-check expect status 200
 
   default-server inter 3s fall 3 rise 2
@@ -99,9 +99,8 @@ backend postgres_back
 backend redis_back
   mode tcp
   balance first
-
-  # timeout connect 3s
-  # timeout check 5s
+  timeout connect 3s
+  timeout check 5s
 
   option tcp-check
 
@@ -119,7 +118,7 @@ backend redis_back
   # default-server inter 3s fall 3 rise 2
 
   {% for host, ip in cluster.items() %}
-  server {{ host }} {{ ip }}:{{ redis_port }} maxconn 512 check inter 1s
+  server {{ host }} {{ ip }}:{{ redis_port }} maxconn 512 check inter 2s
   {% endfor %}
 
   # check inter 3s

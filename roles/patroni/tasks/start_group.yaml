@@ -4,7 +4,7 @@
     name: patroni
     state: started
     enabled: yes
-  when: 'target_group in group_names'
+  when: 'target_group in group_names or assume_replica | default(False)'
   tags:
     - patroni_master
     - patroni_replica
@@ -19,6 +19,7 @@
     changed_when: false
 
   - name: generate pg_hba.conf on {{ target_group }}
+    become: yes
     template:
       src: pg_hba.conf.j2
       dest: '{{ postgres_conf_dir }}/pg_hba.conf'
@@ -27,7 +28,7 @@
       mode: 0640
     register: pg_hba_generation
     tags:
-       - pg_hba
+      - pg_hba
 
   # - name: generation result
   #   debug:
@@ -39,7 +40,7 @@
     failed_when: psql_reload_result.rc != 0
     when: pg_hba_generation.changed
 
-  when: 'target_group in group_names'
+  when: 'target_group in group_names or assume_replica | default(False)'
   become: yes
   become_user: postgres
   tags:

@@ -33,6 +33,7 @@ bootstrap:
   # Add following lines to pg_hba.conf after running 'initdb'
   pg_hba:
     - host replication {{ patroni_replication_username }} 127.0.0.1/32 md5
+    - host postgres {{ patroni_rewind_username }} {{ cluster[ansible_hostname] }}/32 md5
     - host all all 0.0.0.0/0 md5
 
   # Additional script to be launched after initial cluster creation (will
@@ -63,7 +64,7 @@ postgresql:
       username: {{ patroni_superuser_username }}
       password: '{{ patroni_superuser_password }}'
     rewind:  # Has no effect on postgres 10 and lower
-      username: {{ patroni_rewind_user }}
+      username: {{ patroni_rewind_username }}
       password: '{{ patroni_rewind_password }}'
 
   parameters:

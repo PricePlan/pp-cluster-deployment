@@ -143,7 +143,7 @@ $ time ansible-playbook playbooks/pp-cluster.yaml -t rabbitmq -l nginx-server,el
 Последний шаг этапа — установка PricePlan. Выполните:
 
 ```bash
-$ time ansible-playbook playbooks/pp-cluster.yaml -t rabbitmq -l pp
+$ time ansible-playbook playbooks/pp-cluster.yaml -t pp
 ```
 
 Если в процессе проявится подобная ошибка:

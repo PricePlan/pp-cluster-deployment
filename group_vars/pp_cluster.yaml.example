@@ -30,7 +30,7 @@ patroni_superuser_username: postgres
 patroni_superuser_password: 'postgres_passwd'  # Change it!
 patroni_replication_username: replicator
 patroni_replication_password: 'replicator_passwd'  # Change it!
-patroni_rewind_user: rewinder
+patroni_rewind_username: rewinder
 patroni_rewind_password: 'rewinder_passwd'  # Change it!
 
 patroni_ttl: 30

@@ -1,6 +1,27 @@
 # tasks file for dockers/etcd
 ---
 - block:
+  # For recreate etcd cluster
+  - name: stop an etcd container
+    docker_container:
+      name: '{{ etcd_container_name }}'
+      container_default_behavior: '{{ etcd_default_behavior }}'
+      state: stopped
+
+    register: etcd_stopped
+    # failed_when: false
+    tags: etcd
+
+  - name: drop {{ etcd_home }} directory
+    file:
+      path: '{{ etcd_home }}'
+      state: absent
+    tags: etcd
+
+  become: yes
+  when: etcd_reinit | default("false")
+
+- block:
   - name: ensure {{ etcd_home }} directory has proper access mode
     file:
       path: '{{ etcd_home }}'
@@ -48,6 +69,7 @@
 
   become: yes
 
+
 - name: create an etcd container
   docker_container:
     name: '{{ etcd_container_name }}'
@@ -70,6 +92,7 @@
     container_default_behavior: '{{ etcd_default_behavior }}'
   become: yes
   tags:
+    - etcd
     - etcd_container
 
   register: docker_etcd_installed

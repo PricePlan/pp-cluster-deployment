@@ -24,18 +24,17 @@ global
   ssl-default-bind-ciphers PROFILE=SYSTEM
   ssl-default-server-ciphers PROFILE=SYSTEM
 
-
 frontend http
   bind :8080
+  timeout connect         5s
   default_backend stats
 
 backend stats
   mode http
-  stats enable
 
   stats enable
   stats uri /
-  stats refresh 1s
+  stats refresh 2s
   stats show-legends
   stats admin if TRUE
 
@@ -66,6 +65,7 @@ defaults
 #---------------------------------------------------------------------
 frontend pp_{{ web_protocol }}_front
   mode tcp
+
   {% if web_protocol == 'https' -%}
   bind *:{{ nginx_https_port }}
   {% else -%}
@@ -80,15 +80,16 @@ backend pp_{{ web_protocol }}_back
   mode tcp
   balance roundrobin
   timeout check 5s
-  option tcp-check
-  {% if web_protocol == 'https' -%}
-  tcp-check connect port {{ nginx_https_port }}
-  {% else -%}
-  tcp-check connect port {{ nginx_http_port }}
-  {% endif -%}
-  default-server inter 3s fall 3 rise 2
+
+  option httpchk OPTIONS /ready
+  http-check expect status 200
+
+  default-server inter 3s fall 3 rise 2 maxconn 1024
 
 {% for host, ip in cluster.items() %}
-  server {{ host }} {{ ip }}:{% if web_protocol == 'https' -%}
-    {{ nginx_https_port }}{% else -%}{{ nginx_http_port }}{% endif %} maxconn 1024 check
+{% if web_protocol == 'https' %}
+  server {{ host }} {{ ip }}:{{ nginx_https_port }} check check-ssl verify none
+{% else %}
+  server {{ host }} {{ ip }}:{{ nginx_http_port }}
+{% endif %}
 {% endfor %}

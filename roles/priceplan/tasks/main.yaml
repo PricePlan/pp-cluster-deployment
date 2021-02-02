@@ -18,6 +18,44 @@
   tags:
     - registry_login
 
+- name: run migrations
+  docker_container:
+    name: pp_migrations
+    image: '{{ pp_image_name }}'
+    pull: '{{ docker_pull }}'
+    # state: started
+    recreate: yes
+    detach: no
+    interactive: yes
+    tty: yes
+
+    log_driver: '{{ pp_log_driver }}'
+    log_options: '{{ pp_log_options }}'
+    network_mode: '{{ pp_network_mode }}'
+
+    exposed_ports: []
+    published_ports: []
+    env: '{{ pp_environment }}'
+    links: '{{ pp_links }}'
+    volumes: '{{ pp_volumes | default([]) }}'
+    restart_policy: always
+    command: 'mng migrate_schema --schema=main'
+    container_default_behavior: '{{ pp_default_behavior }}'
+
+  when:
+    inventory_hostname == groups.pp_cluster[0]
+  register: migration_applied
+  tags:
+    - migrations
+
+- name: echo migration output
+  debug:
+    var: migration_applied.ansible_facts.docker_container.Output
+  when:
+    inventory_hostname == groups.pp_cluster[0]
+  tags:
+    - migrations
+
 - name: run bunch of PricePlan services...
   vars:
     taget_container_desc: '{{ pp_layout[item].desc }}'

@@ -28,6 +28,7 @@
     detach: no
     interactive: yes
     tty: yes
+    # auto_remove: yes
 
     log_driver: '{{ pp_log_driver }}'
     log_options: '{{ pp_log_options }}'
@@ -38,7 +39,7 @@
     env: '{{ pp_environment }}'
     links: '{{ pp_links }}'
     volumes: '{{ pp_volumes | default([]) }}'
-    restart_policy: always
+    restart_policy: 'no'
     command: 'mng migrate_schema --schema=main'
     container_default_behavior: '{{ pp_default_behavior }}'
 

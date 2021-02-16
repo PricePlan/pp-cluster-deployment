@@ -48,7 +48,7 @@ pp_layout:
     - mail
   http:
     name: pp_http
-    desc: run worker for http hooks
+    desc: worker for http hooks
     command:
     - http
   search:

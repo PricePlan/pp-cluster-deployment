@@ -41,7 +41,7 @@ pp_cluster
 [webfront:children]
 pp_cluster
 
-[pp_cron]
+[cron]
 pp1
 
 [uwsgi:children]

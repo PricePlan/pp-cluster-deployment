@@ -134,7 +134,7 @@ $ docker logs -f rabbitmq
 Следующая цель — развернуть ELK кластер. Запустите:
 
 ```bash
-$ time ansible-playbook playbooks/pp-cluster.yaml -t rabbitmq -l nginx-server,elk
+$ time ansible-playbook playbooks/pp-cluster.yaml -t nginx-server,elk
 ```
 
 После того, как отработает playbook зайдите на http://kibana.tl.dr, если

@@ -24,10 +24,15 @@
       cmd: dnf module enable container-tools -y
       warn: false
 
-  - name: ensure container-selinux installed
+  - name: ensure necessary packages installed
     dnf:
-      name: container-selinux
+      # name: container-selinux
+      name: '{{ item }}'
       state: present
+    loop:
+      - container-selinux
+      - slirp4netns
+      - fuse-overlayfs
 
   - name: disable container-tools module
     command:

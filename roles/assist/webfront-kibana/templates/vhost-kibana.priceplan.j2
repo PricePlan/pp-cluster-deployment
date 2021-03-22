@@ -8,12 +8,12 @@ upstream kibana {
 
 # See https://mozilla.github.io/server-side-tls/ssl-config-generator/
 server {
-{% if 'production' in group_names %}
+{% if web_protocol == 'https' %}
   listen {{ nginx_https_port }} ssl http2;
   listen [::]:{{ nginx_https_port }} ssl http2;
 
-  ssl_certificate /etc/letsencrypt/live/priceplan.pro/fullchain.pem;
-  ssl_certificate_key /etc/letsencrypt/live/priceplan.pro/privkey.pem;
+  ssl_certificate {{ nginx_config_dir }}/ssl/priceplan.crt;
+  ssl_certificate_key {{ nginx_config_dir }}/ssl/priceplan.key;
 
   include snippets/ssl.conf;
 {% else %}

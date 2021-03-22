@@ -30,3 +30,4 @@ DMZ, рекомендуется организовать между ними VPN
 * [Переход на HTTPS](docs/https.md)
 * [Обновление PricePlan](docs/upgrade_pp.md)
 * [Восстановление отдельной ноды кластера](docs/recover_node.md)
+* [Подключение аутентификации/авторизации средствами AD](docs/auth-ldap.md)

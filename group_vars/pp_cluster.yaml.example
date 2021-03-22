@@ -128,3 +128,35 @@ sites_home: /opt/sites
 static_home: '{{ sites_home }}/static'
 
 settings_module_name: dataspace
+
+# LDAP
+ldap_enabled: false
+
+certs_home: '/opt/certs'
+ldap_CA_cert: 'ad-ca.cer'
+
+ldap_server_uri_1: 'ldaps://ad.example.com'
+ldap_bind_dn_1: 'pp_agent@example.com'
+ldap_bind_password_1: 'pp_agent_password'
+
+ldap_server_uri_2: 'ldaps://ad2.example.com'
+ldap_bind_dn_2: 'pp_agent@example.com'
+ldap_bind_password_2: 'pp_agent_password'
+
+ldap_user_attr_map:
+  first_name: givenName
+  last_name: sn
+  email: userPrincipalName
+
+ldap_deny_group: disabled
+ldap_managers_group: Менеджеры
+ldap_superusers_group: superusers
+
+ldap_base_dn: 'dc=example,dc=com'
+ldap_user_search_dn: 'cn=users,{{ ldap_base_dn }}'
+
+ldap_group_name_attr: 'cn'
+ldap_priceplan_dn: 'ou=priceplan,{{ ldap_base_dn }}'
+ldap_deny_group_dn: '{{ ldap_group_name_attr }}={{ ldap_deny_group }},{{ ldap_priceplan_dn }}'
+ldap_managers_group_dn: '{{ ldap_group_name_attr }}={{ ldap_managers_group }},{{ ldap_priceplan_dn }}'
+ldap_superusers_group_dn: '{{ ldap_group_name_attr }}={{ ldap_superusers_group }},{{ ldap_priceplan_dn }}'

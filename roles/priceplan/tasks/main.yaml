@@ -1,13 +1,30 @@
-- name: ensure settings is up to date
+- block:
+  - name: ensure certificates home directory exists
+    file: path='{{ certs_home }}' state=directory
+      owner=root group=root mode=0755
+    when: ldap_enabled
+
+  - name: ensure CA certificate for LDAP is up to date
+    copy: src='{{ inventory_dir }}/files/ssl/{{ ldap_CA_cert }}'
+      dest='{{ certs_home }}/{{ ldap_CA_cert }}'
+      owner=root group=root mode=0644
+    when: ldap_enabled
+    register: ldap_cacert_placed
+    tags:
+      - pp_conf
+
+  - name: ensure settings is up to date
+    template:
+      src: cluster.py.j2
+      dest: '{{ sites_home }}/{{ settings_module_name }}.py'
+      owner: '{{ pp_uid }}'
+      group: '{{ pp_gid }}'
+      mode: '0440'
+    register: cluster_py_produced
+    tags:
+      - pp_conf
+
   become: yes
-  template:
-    src: cluster.py.j2
-    dest: '{{ sites_home }}/{{ settings_module_name }}.py'
-    owner: '{{ pp_uid }}'
-    group: '{{ pp_gid }}'
-    mode: '0440'
-  tags:
-    - pp_conf
 
 - name: log into PricePlan registry
   docker_login:
@@ -18,11 +35,18 @@
   tags:
     - registry_login
 
+- name: pull PricePlan image
+  docker_image:
+    name: '{{ pp_image_name }}'
+    source: pull
+    force_source: true
+  when: docker_pull
+
 - name: run migrations
   docker_container:
     name: pp_migrations
     image: '{{ pp_image_name }}'
-    pull: '{{ docker_pull }}'
+    # pull: '{{ docker_pull }}'
     # state: started
     recreate: yes
     detach: no
@@ -51,7 +75,7 @@
 
 - name: echo migration output
   debug:
-    var: migration_applied.ansible_facts.docker_container.Output
+    var: migration_applied.container.Output
   when:
     inventory_hostname == groups.pp_cluster[0]
   tags:
@@ -63,6 +87,7 @@
     taget_container_name: '{{ pp_layout[item].name }}'
     target_commnad: '{{ pp_layout[item].command }}'
     target_group: '{{ item }}'
+    target_volumes: '{{ pp_layout[item].volumes | default(pp_volumes) }}'
   include_tasks: start.yaml
   loop: '{{ pp_layout.keys() | list }}'
 

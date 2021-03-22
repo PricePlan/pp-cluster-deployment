@@ -2,7 +2,7 @@
   docker_container:
     name: '{{ taget_container_name }}'
     image: '{{ pp_image_name }}'
-    pull: '{{ docker_pull }}'
+    # pull: '{{ docker_pull }}'
     state: started
     recreate: yes
 
@@ -14,7 +14,7 @@
     published_ports: []
     env: '{{ pp_environment }}'
     links: '{{ pp_links }}'
-    volumes: '{{ pp_volumes | default([]) }}'
+    volumes: '{{ target_volumes | default([]) }}'
     restart_policy: always
     command: '{{ target_commnad }}'
     container_default_behavior: '{{ pp_default_behavior }}'

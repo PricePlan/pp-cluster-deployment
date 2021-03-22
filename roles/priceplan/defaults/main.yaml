@@ -9,6 +9,8 @@ pp_log_options:
 pp_links: []
 pp_volumes:
   - '{{ sites_home }}/{{ settings_module_name }}.py:/pp/priceplan/settings/{{ settings_module_name }}.py:ro'
+pp_additional_volumes:
+  - '{{ certs_home }}/{{ ldap_CA_cert }}:{{ certs_home }}/{{ ldap_CA_cert }}:ro'
 
 pp_environment:
   SECRET_KEY: '{{ pp_secret_key }}'
@@ -24,6 +26,7 @@ pp_layout:
   uwsgi:
     name: pp_wsgi
     desc: WSGI server
+    volumes: '{{ pp_volumes | union(pp_additional_volumes) }}'
     command:
     - wsgi
   common:

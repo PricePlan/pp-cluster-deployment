@@ -113,7 +113,7 @@ postgres_databases:
 docker_registry: docker.io
 registry_user: docker_user  # Change it!
 registry_password: 'docker_password' # Change it!
-pp_image_version: 1.15.22
+pp_image_version: 1.15.23
 
 # Run to generate:
 # $ echo $(base64 /dev/urandom | head -c50)

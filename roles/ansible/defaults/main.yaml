@@ -17,8 +17,7 @@ pp_cluster_git_repo: 'git@github.com:PricePlan/pp-cluster-deployment'
 
 important_files:
   - files
-  - group_vars/all.yaml
-  - group_vars/pp_cluster.yaml
+  - group_vars
   - keys
   - dev_hosts
   - stg_hosts

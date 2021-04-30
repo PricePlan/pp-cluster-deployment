@@ -1,0 +1,7 @@
+# Put Ansible site to control host
+---
+- name: Deploy Ansible site
+  hosts: devops
+
+  roles:
+  - { role: ansible }

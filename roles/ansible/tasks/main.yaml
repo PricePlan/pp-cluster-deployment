@@ -1,0 +1,86 @@
+# Tasks of 'ansible' role
+---
+- block:
+  - name: ensure necessary packages present
+    apt:
+      pkg: '{{ ansible_dependency_packages }}'
+      update_cache: yes
+      cache_valid_time: 3600
+
+  - name: ensure PVEs home exits
+    file: path='{{ pves_home }}' state=directory owner='{{ deploy_user }}'
+      group=adm
+    tags:
+      - pve
+
+  - name: sites home directory exists
+    file: path='{{ sites_home }}' state=directory
+      owner='{{ deploy_user }}' group=adm
+
+  become: yes
+
+- name: ensure deploy key on the its place
+  copy:
+    src: '{{ playbook_dir | dirname }}/keys/{{ item }}'
+    dest: '{{ sites_home }}/'
+    owner: '{{ deploy_user }}'
+    mode: 0400
+  with_items:
+    - pp_deploy_rsa7
+
+- name: update PP-Cluster ansible site code from git
+  git:
+    repo: '{{ pp_cluster_git_repo }}'
+    dest: '{{ sites_home }}/{{ pp_cluster_project }}'
+    version: '{{ pp_cluster_git_branch | default("master") }}'
+    # update: yes
+    accept_hostkey: yes
+    key_file: '{{ sites_home }}/pp_deploy_rsa7'
+    force: yes
+  register: pp_cluster_code_updated
+  tags:
+    - code
+
+- name: ensure 'log' directory is writable
+  ansible.builtin.file:
+    path: '{{ sites_home }}/{{ pp_cluster_project }}/log'
+    state: directory
+    mode: 0775
+  tags:
+    - code
+
+- name: ensure PP-Cluster PVE is up to date
+  pip:
+    name: ansible
+    virtualenv_python: 'python{{ python_version }}'
+    virtualenv: '{{ project_pve_path }}'
+  register: ansible_pve
+  tags:
+    - pve
+
+- name: ensure PVE .project file is up to date
+  lineinfile:
+    path: '{{ project_pve_path }}/.project'
+    create: yes
+    state: present
+    line: '{{ sites_home }}/{{ pp_cluster_project }}'
+    owner: '{{ deploy_user }}'
+    group: adm
+    mode: 0644
+  tags:
+    - pve
+
+- name: copy important files from dev workstation to control host
+  synchronize:
+    src: '{{ playbook_dir | dirname }}/{{ item }}'
+    dest: '{{ sites_home }}/{{ pp_cluster_project }}/'
+    archive: no
+    recursive: yes
+    use_ssh_args: yes
+    # rsync_opts:
+    #   - '--delete'
+    #   - '--stats'
+    #   - '--exclude-from={{ inventory_dir }}/rsync.ignore'
+  with_items: '{{ important_files }}'
+  tags:
+    - rsync

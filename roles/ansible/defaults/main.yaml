@@ -1,0 +1,25 @@
+# Default values of 'ansible' role
+---
+prefix: /opt
+sites_home: '{{ prefix }}/sites'
+logs_home: '{{ sites_home }}/logs'
+pves_home: '{{ prefix }}/pves'
+
+ansible_dependency_packages:
+  - python3.9
+  - sshpass
+
+python_version: 3.9
+project_pve_path: '{{ pves_home }}/pp-cluster-{{ python_version }}'
+
+pp_cluster_project: pp-cluster-deployment
+pp_cluster_git_repo: 'git@github.com:PricePlan/pp-cluster-deployment'
+
+important_files:
+  - files
+  - group_vars/all.yaml
+  - group_vars/pp_cluster.yaml
+  - keys
+  - dev_hosts
+  - stg_hosts
+  - ya_hosts
